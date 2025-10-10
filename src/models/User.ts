@@ -2,26 +2,65 @@ import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
+  name: string;
   email: string;
   password: string;
   role: "admin" | "coordinator" | "faculty" | "student";
-  batch?: string; // Optional: only for students
+  designation?: "Professor" | "Associate Professor" | "Assistant Professor" | "Lecturer" | null;
+  batch?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
   {
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: 6,
+    },
+    designation: {
+      type: String,
+      enum: [
+        "Professor",
+        "Associate Professor",
+        "Assistant Professor",
+        "Lecturer",
+      ],
+      default: null,
+    },
+
     role: {
       type: String,
       enum: ["admin", "coordinator", "faculty", "student"],
-      required: true,
+      required: [true, "Role is required"],
     },
-    batch: { type: String }, // Optional
+    batch: {
+      type: String,
+      default: "",
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true, // adds createdAt & updatedAt
+  }
 );
 
+// 🔹 Ensure unique email index
+UserSchema.index({ email: 1 }, { unique: true });
+
+// 🔹 Prevent model overwrite in dev hot-reload
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 
