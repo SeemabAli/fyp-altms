@@ -6,7 +6,12 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: "admin" | "coordinator" | "faculty" | "student";
-  designation?: "Professor" | "Associate Professor" | "Assistant Professor" | "Lecturer" | null;
+  designation?:
+    | "Professor"
+    | "Associate Professor"
+    | "Assistant Professor"
+    | "Lecturer"
+    | null;
   batch?: string;
   createdAt: Date;
   updatedAt: Date;

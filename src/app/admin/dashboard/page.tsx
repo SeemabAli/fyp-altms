@@ -116,7 +116,13 @@ export default function AdminDashboard() {
                   >
                     <td className="px-4 py-3">{user.name}</td>
                     <td className="px-4 py-3">{user.email}</td>
-                    <td className="px-4 py-3 capitalize">{user.role}</td>
+                    <td className="px-4 py-3">
+                      {user.role === "faculty" && (user as any).designation
+                        ? `Faculty (${(user as any).designation})`
+                        : user.role.charAt(0).toUpperCase() +
+                          user.role.slice(1)}
+                    </td>
+
                     <td className="px-4 py-3 text-sm text-gray-500">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>

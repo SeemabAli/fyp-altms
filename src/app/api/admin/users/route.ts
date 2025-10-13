@@ -8,7 +8,7 @@ export async function GET() {
     await connectDB();
     // Include tempPassword field to show plaintext passwords
     const users = await User.find({})
-      .select("+tempPassword name email role createdAt")
+      .select("name email role designation batch createdAt")
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, users });

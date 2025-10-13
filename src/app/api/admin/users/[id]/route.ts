@@ -28,7 +28,7 @@ export async function PUT(
   try {
     await connectDB();
     const body = await req.json();
-    const { name, email, role } = body;
+    const { name, email, role, designation } = body;
 
     // Validate required fields
     if (!name || !email || !role) {
@@ -54,7 +54,12 @@ export async function PUT(
     // Update user
     const updatedUser = await User.findByIdAndUpdate(
       params.id,
-      { name, email, role },
+      {
+        name,
+        email,
+        role,
+        designation: role === "faculty" ? designation : null, // ✅ same condition as create
+      },
       { new: true, runValidators: true }
     );
 

@@ -1,33 +1,31 @@
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
-export interface ITimetable extends Document {
-  course: Types.ObjectId;
-  faculty: Types.ObjectId;
-  classroom: Types.ObjectId;
-  day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday";
-  timeSlot: Types.ObjectId;
-  studentBatch: string;
-  semester: string;
+interface ITimetable extends Document {
+  facultyId: string;
+  courseCode: string;
+  courseTitle: string;
+  room: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  batch?: string;
 }
 
 const TimetableSchema = new Schema<ITimetable>(
   {
-    course: { type: Schema.Types.ObjectId, ref: "Course", required: true },
-    faculty: { type: Schema.Types.ObjectId, ref: "Faculty", required: true },
-    classroom: { type: Schema.Types.ObjectId, ref: "Classroom", required: true },
-    day: { 
-      type: String, 
-      enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], 
-      required: true 
-    },
-    timeSlot: { type: Schema.Types.ObjectId, ref: "Timeslot", required: true },
-    studentBatch: { type: String, required: true },
-    semester: { type: String, required: true },
+    facultyId: { type: String, required: true },
+    courseCode: { type: String, required: true },
+    courseTitle: { type: String, required: true },
+    room: { type: String, required: true },
+    day: { type: String, required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
+    batch: { type: String },
   },
   { timestamps: true }
 );
 
 const Timetable: Model<ITimetable> =
-  mongoose.models.Timetable || mongoose.model<ITimetable>("Timetable", TimetableSchema);
+  mongoose.models.Timetable || mongoose.model("Timetable", TimetableSchema);
 
 export default Timetable;

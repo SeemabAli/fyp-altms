@@ -19,6 +19,7 @@ const userSchema = z.object({
       "Assistant Professor",
       "Lecturer",
     ])
+    .or(z.literal(""))
     .optional(),
 });
 

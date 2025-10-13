@@ -9,7 +9,7 @@ export default function Providers({ children }: { children: ReactNode }) {
     <SessionProvider>
       {children}
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           duration: 5000,
         }}

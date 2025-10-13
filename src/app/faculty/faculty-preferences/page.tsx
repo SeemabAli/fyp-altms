@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,203 +7,186 @@ import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import toast from "react-hot-toast";
-import PreferenceModal from "./PreferenceModal";
+import { Loader2 } from "lucide-react";
+import { facultyPreferenceSchema } from "@/lib/zodSchemas";
+
+interface Course {
+  _id: string;
+  code: string;
+  title: string;
+}
 
 export default function FacultyPreferencesPage() {
   const { data: session } = useSession();
-  const [courses, setCourses] = useState<any[]>([]);
-  const [preferences, setPreferences] = useState<any>(null);
-  const [open, setOpen] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [preferences, setPreferences] = useState<string[]>([
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
+  const [submittedPrefs, setSubmittedPrefs] = useState<Course[]>([]);
+  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  const fetchCourses = async () => {
-    try {
-      const res = await fetch("/api/courses", { cache: "no-store" });
-      const data = await res.json();
-      if (res.ok) {
-        setCourses(data);
-      } else {
-        toast.error("Failed to fetch courses");
-      }
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      toast.error("Failed to fetch courses");
-    }
-  };
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
 
-  const fetchPreferences = async () => {
-    if (!session?.user?.id) return;
-    
+  const fetchInitialData = async () => {
     try {
-      const res = await fetch(`/api/preferences/faculty/${session.user.id}`, { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        setPreferences(data);
-      } else {
-        // No preferences found yet - this is okay for new faculty
-        setPreferences(null);
+      // Fetch both courses and submitted prefs
+      const [coursesRes, prefsRes] = await Promise.all([
+        fetch("/api/courses"),
+        fetch("/api/faculty/preferences"),
+      ]);
+      const coursesData = await coursesRes.json();
+      const prefsData = await prefsRes.json();
+
+      setCourses(coursesData.courses || []);
+
+      if (prefsData.submitted) {
+        setSubmitted(true);
+        setSubmittedPrefs(prefsData.preference.courses || []);
       }
-    } catch (error) {
-      console.error("Error fetching preferences:", error);
+    } catch {
+      toast.error("Failed to load data");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCourses();
-    fetchPreferences();
-  }, [session?.user?.id]);
-
-  const getSelectedCourses = () => {
-    if (!preferences?.courses) return [];
-    return courses.filter(course => 
-      preferences.courses.some((prefCourse: any) => 
-        prefCourse._id === course._id || prefCourse === course._id
-      )
-    );
+  const handleChange = (index: number, value: string) => {
+    const updated = [...preferences];
+    updated[index] = value;
+    setPreferences(updated);
   };
 
-  const selectedCourses = getSelectedCourses();
+  const handleSubmit = async () => {
+    const parsed = facultyPreferenceSchema.safeParse({ preferences });
+
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/faculty/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preferences }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Preferences submitted successfully");
+        setSubmitted(true);
+        fetchInitialData();
+      } else {
+        toast.error(data.error || "Submission failed");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
-      <div className="min-h-screen p-6 bg-gray-50">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Faculty • Course Preferences</h1>
-          <LogoutButton />
-        </div>
-
-        {/* Instructions */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-medium text-blue-800 mb-2">Instructions</h2>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>• You must select at least <strong>5 course preferences</strong></li>
-            <li>• You can be assigned a minimum of 2 and maximum of 3 courses</li>
-            <li>• Higher designation faculty get priority in course assignment</li>
-            <li>• Earlier submissions get priority if designations are equal</li>
-          </ul>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Loading preferences...</p>
+      {/* HEADER */}
+      <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
+        <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
+              alt="VU Logo"
+              className="w-8 h-auto"
+            />
           </div>
-        ) : (
-          <>
-            {/* Current Preferences Status */}
-            <div className="bg-white rounded-xl shadow p-6 mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Your Current Preferences</h2>
-                <button
-                  onClick={() => setOpen(true)}
-                  className={`px-4 py-2 rounded transition-colors ${
-                    selectedCourses.length >= 5 
-                      ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {preferences ? 'Update Preferences' : 'Set Preferences'}
-                </button>
-              </div>
+          <span className="text-lg font-semibold">
+            Automated Timetable System
+          </span>
+        </div>
+        <LogoutButton />
+      </div>
 
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  selectedCourses.length >= 5 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {selectedCourses.length}/5 minimum courses selected
-                </div>
-                {preferences?.submittedAt && (
-                  <div className="text-sm text-gray-600">
-                    Last updated: {new Date(preferences.submittedAt).toLocaleDateString()}
+      {/* MAIN CONTENT */}
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-white p-6 rounded-xl border-l-4 border-[#d89860] shadow-sm">
+          <h1 className="text-2xl font-semibold text-[#493737] mb-2">
+            Course Preferences
+          </h1>
+
+          {loading ? (
+            <div className="text-center text-gray-500 py-6">Loading...</div>
+          ) : submitted ? (
+            <>
+              <p className="text-sm text-gray-600 mb-4">
+                You have already submitted your preferences. You cannot edit
+                them again.
+              </p>
+              <div className="space-y-3">
+                {submittedPrefs.map((course, idx) => (
+                  <div
+                    key={course._id}
+                    className="flex justify-between border rounded-lg p-3 bg-gray-50"
+                  >
+                    <span className="font-medium text-[#493737]">
+                      {idx + 1}. {course.code} - {course.title}
+                    </span>
                   </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-gray-600 mb-4">
+                Select at least 5 course preferences from the available list.
+              </p>
+
+              <div className="space-y-4">
+                {preferences.map((pref, index) => (
+                  <div key={index} className="flex flex-col">
+                    <label className="text-sm text-gray-700 font-medium mb-1">
+                      Preference #{index + 1}
+                    </label>
+                    <select
+                      value={pref}
+                      onChange={(e) => handleChange(index, e.target.value)}
+                      className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d89860]"
+                    >
+                      <option value="">Select a course</option>
+                      {courses.map((course) => (
+                        <option key={course._id} value={course._id}>
+                          {course.code} - {course.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="mt-6 w-full py-2 bg-[#d89860] text-white rounded-lg hover:bg-[#c08850] transition flex items-center justify-center"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2 h-5 w-5" />{" "}
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Preferences"
                 )}
-              </div>
-
-              {selectedCourses.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No preferences set yet.</p>
-                  <p className="text-sm mt-1">Click &quot;Set Preferences&quot; to get started.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {selectedCourses.map((course, index) => (
-                    <div key={course._id} className="border rounded-lg p-4 bg-gray-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                              #{index + 1}
-                            </span>
-                            <span className="font-medium text-blue-600">{course.code}</span>
-                          </div>
-                          <h3 className="font-medium mt-1">{course.name}</h3>
-                          <p className="text-sm text-gray-600">{course.department}</p>
-                          <div className="flex items-center gap-3 mt-2">
-                            <span className="text-xs text-gray-500">
-                              {course.creditHours} credit hours
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {course.enrollment} students
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* All Available Courses */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">All Available Courses</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {courses.map((course) => {
-                  const isSelected = selectedCourses.some(sc => sc._id === course._id);
-                  return (
-                    <div key={course._id} className={`border rounded-lg p-4 ${
-                      isSelected ? 'bg-blue-50 border-blue-200' : 'bg-white'
-                    }`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-blue-600">{course.code}</span>
-                        {isSelected && (
-                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                            Selected
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-medium mb-1">{course.name}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{course.department}</p>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>{course.creditHours} credit hours</span>
-                        <span>{course.enrollment} students</span>
-                      </div>
-                      {course.multimediaRequired && (
-                        <span className="inline-block mt-2 bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
-                          Multimedia Required
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Preference Modal */}
-        <PreferenceModal
-          open={open}
-          setOpen={setOpen}
-          courses={courses}
-          currentPreferences={preferences}
-          refresh={fetchPreferences}
-          facultyId={session?.user?.id}
-        />
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </ProtectedRoute>
   );

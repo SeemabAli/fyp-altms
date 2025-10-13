@@ -11,19 +11,23 @@ export const courseSchema = z.object({
   studentBatch: z.string().optional(),
 });
 
-// GET /api/courses
+// ✅ GET /api/courses
 export async function GET() {
   try {
     await connectDB();
     const courses = await Course.find().sort({ createdAt: -1 });
-    return NextResponse.json(courses, { status: 200 });
+    // 👇 Wrap inside object for consistency
+    return NextResponse.json({ success: true, courses }, { status: 200 });
   } catch (error) {
     console.error("Error fetching courses:", error);
-    return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch courses" },
+      { status: 500 }
+    );
   }
 }
 
-// POST /api/courses
+// ✅ POST /api/courses
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -37,9 +41,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const exists = await Course.findOne({ code: parsed.data.code.toUpperCase() });
+    const exists = await Course.findOne({
+      code: parsed.data.code.toUpperCase(),
+    });
     if (exists) {
-      return NextResponse.json({ error: "Course with this code already exists" }, { status: 409 });
+      return NextResponse.json(
+        { error: "Course with this code already exists" },
+        { status: 409 }
+      );
     }
 
     const created = await Course.create({
@@ -47,9 +56,15 @@ export async function POST(req: Request) {
       code: parsed.data.code.toUpperCase(),
     });
 
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json(
+      { success: true, course: created },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating course:", error);
-    return NextResponse.json({ error: "Failed to create course" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create course" },
+      { status: 500 }
+    );
   }
 }

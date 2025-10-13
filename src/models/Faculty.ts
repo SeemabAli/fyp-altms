@@ -1,57 +1,39 @@
-import mongoose, { Schema, Document, Types, Model } from "mongoose";
-import { z } from "zod";
+import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-export interface ICoursePreference {
-  courseId: Types.ObjectId;
-  timeSlots: Types.ObjectId[];
+export interface IFacultyPreference extends Document {
+  facultyId: Types.ObjectId;
+  courses: Types.ObjectId[];
+  timestamp: Date;
 }
 
-export interface IFaculty extends Document {
-  name: string;
-  email: string;
-  department: string;
-  designation: "Lecturer" | "AssistantProfessor" | "AssociateProfessor" | "Professor";
-  preferences: ICoursePreference[];
-  preferenceSubmittedAt?: Date;
-}
-
-const CoursePreferenceSchema = new Schema<ICoursePreference>(
+const FacultyPreferenceSchema: Schema<IFacultyPreference> = new Schema(
   {
-    courseId: { type: Schema.Types.ObjectId, ref: "Course", required: true },
-    timeSlots: [{ type: Schema.Types.ObjectId, ref: "Timeslot", required: true }],
-  },
-  { _id: false }
-);
-
-const FacultySchema = new Schema<IFaculty>(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    department: { type: String, required: true },
-    designation: {
-      type: String,
-      enum: ["Lecturer", "AssistantProfessor", "AssociateProfessor", "Professor"],
+    facultyId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
+      unique: true, // One set of preferences per faculty
     },
-    preferences: { type: [CoursePreferenceSchema], default: [] },
-    preferenceSubmittedAt: Date,
+    courses: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Course",
+        required: true,
+      },
+    ],
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
 
-// Zod validation schema
-export const coursePreferencesSchema = z.object({
-  preferences: z
-    .array(
-      z.object({
-        courseId: z.string().min(1, "Invalid course ID"),
-        timeSlots: z.array(z.string()).min(1, "At least one time slot is required"),
-      })
-    )
-    .length(5, "Exactly 5 course preferences are required"),
-});
+const FacultyPreference: Model<IFacultyPreference> =
+  mongoose.models.FacultyPreference ||
+  mongoose.model<IFacultyPreference>(
+    "FacultyPreference",
+    FacultyPreferenceSchema
+  );
 
-const Faculty: Model<IFaculty> =
-  mongoose.models.Faculty || mongoose.model<IFaculty>("Faculty", FacultySchema);
-
-export default Faculty;
+export default FacultyPreference;

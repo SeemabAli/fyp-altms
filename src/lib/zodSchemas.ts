@@ -3,6 +3,12 @@ import { z } from "zod";
 export const facultySchema = z.object({
   name: z.string().min(2, "Name is too short"),
   email: z.string().email("Invalid email"),
+  designation: z.enum([
+    "Professor",
+    "Associate Professor",
+    "Assistant Professor",
+    "Lecturer",
+  ]),
   department: z.string().min(2, "Department is required"),
 });
 
@@ -14,7 +20,6 @@ export const studentSchema = z.object({
   semester: z.number().min(1).max(8),
   section: z.string().optional(),
 });
-
 
 export const coordinatorSchema = z.object({
   name: z.string().min(2, "Name is too short"),
@@ -43,5 +48,33 @@ export const classroomSchema = z.object({
 });
 
 export const facultyPreferenceSchema = z.object({
-  courses: z.array(z.string()).min(5, "You must select at least 5 courses"),
+  preferences: z
+    .array(z.string().min(1, "Please select a course"))
+    .min(5, "At least 5 course preferences are required"),
+});
+
+export const timetableSchema = z.object({
+  facultyId: z.string(),
+  courseCode: z.string(),
+  courseTitle: z.string(),
+  room: z.string(),
+  day: z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
+  startTime: z.string(), // e.g., "08:00"
+  endTime: z.string(), // e.g., "09:30"
+  batch: z.string().optional(),
+});
+
+export const facultyProfileSchema = z.object({
+  name: z.string().min(2, "Name is too short"),
+  email: z.string().email("Invalid email"),
+  designation: z
+    .enum([
+      "Professor",
+      "Associate Professor",
+      "Assistant Professor",
+      "Lecturer",
+    ])
+    .nullable()
+    .optional(),
+  department: z.string().optional(),
 });
