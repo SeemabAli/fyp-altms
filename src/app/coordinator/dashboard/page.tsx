@@ -11,7 +11,6 @@ import {
   ClipboardList,
   Zap,
   Eye,
-  UserX,
   BookX,
   CalendarX,
   PenTool,
@@ -69,10 +68,10 @@ export default function CoordinatorDashboard() {
       icon: Eye,
     },
     {
-      href: "/coordinator/unscheduled/faculty",
-      title: "Unscheduled Faculty",
-      desc: "View faculty members who couldn't be assigned courses.",
-      icon: UserX,
+      href: "/coordinator/enrollment",
+      title: "Enrollment",
+      desc: "View and enroll students.",
+      icon: UserPlus,
     },
     {
       href: "/coordinator/unscheduled-summary",
@@ -91,12 +90,6 @@ export default function CoordinatorDashboard() {
       title: "Manual Scheduling",
       desc: "Manually assign remaining courses and faculty to slots.",
       icon: PenTool,
-    },
-    {
-      href: "/coordinator/enrollment",
-      title: "Enrollment",
-      desc: "View and enroll students.",
-      icon: UserPlus,
     },
     {
       href: "/coordinator/profile",

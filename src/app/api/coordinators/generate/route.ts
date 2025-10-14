@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
-import ScheduleEntry from "@/models/ScheduleEntry";
+import ScheduleEntry, { IScheduleEntry } from "@/models/ScheduleEntry"; // Import IScheduleEntry
 import FacultyPreference from "@/models/Faculty";
 import Course from "@/models/Course";
 import Classroom from "@/models/Classroom";
@@ -22,21 +22,25 @@ export async function POST() {
       );
     }
 
-    // Simplified scheduling logic (placeholder)
-    const generated: any[] = [];
+    // Suggestion: Use the proper type instead of 'any' for type safety
+    const generated: IScheduleEntry[] = [];
 
     for (const pref of preferences) {
       const faculty = pref.facultyId;
-      const selectedCourses = pref.courses.slice(0, 2); // assign 2
+      const selectedCourses = pref.courses.slice(0, 2);
       for (const courseId of selectedCourses) {
         const room = rooms[Math.floor(Math.random() * rooms.length)];
-        const slot = ["08:00-09:30", "10:00-11:30", "12:00-13:30"][Math.floor(Math.random() * 3)];
-        const day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][Math.floor(Math.random() * 5)];
+        const slot = ["08:00-09:30", "10:00-11:30", "12:00-13:30"][
+          Math.floor(Math.random() * 3)
+        ];
+        const day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][
+          Math.floor(Math.random() * 5)
+        ];
 
         const entry = await ScheduleEntry.create({
           courseId,
           facultyId: faculty._id,
-          classroomId: room._id,
+          roomId: room._id,
           slot,
           day,
         });

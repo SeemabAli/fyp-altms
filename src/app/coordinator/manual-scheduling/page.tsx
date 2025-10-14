@@ -61,15 +61,16 @@ export default function ManualSchedulingPage() {
   }, []);
 
   const fetchUnscheduled = async () => {
-    try {
-      const res = await fetch("/api/coordinators/unscheduled");
-      const data = await res.json();
-      if (res.ok) setCourses(data.unscheduled || []);
-      else toast.error(data.error);
-    } catch {
-      toast.error("Failed to fetch unscheduled courses");
-    }
-  };
+  try {
+    const res = await fetch("/api/coordinators/unscheduled");
+    const data = await res.json();
+    if (res.ok) setCourses(data.unscheduledCourses || []);
+    else toast.error(data.error || "Failed to fetch unscheduled courses");
+  } catch {
+    toast.error("Failed to fetch unscheduled courses");
+  }
+};
+
 
   const fetchFaculties = async () => {
     try {
@@ -129,7 +130,7 @@ export default function ManualSchedulingPage() {
       const res = await fetch("/api/coordinators/manual-scheduling", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, roomId: form.classroomId }),
       });
 
       const data = await res.json();

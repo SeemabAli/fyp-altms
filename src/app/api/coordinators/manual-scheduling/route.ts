@@ -1,3 +1,5 @@
+// Correct path: app/api/coordinators/manual-scheduling/route.ts
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
 import ScheduleEntry from "@/models/ScheduleEntry";
@@ -5,11 +7,12 @@ import ScheduleEntry from "@/models/ScheduleEntry";
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { courseId, facultyId, classroomId, slot, day } = await req.json();
+    // ✅ FIX: Receive 'roomId' from the frontend form
+    const { courseId, facultyId, roomId, slot, day } = await req.json();
 
-    if (!courseId || !facultyId || !classroomId || !slot || !day) {
+    if (!courseId || !facultyId || !roomId || !slot || !day) {
       return NextResponse.json(
-        { error: "All fields required" },
+        { error: "All fields are required" },
         { status: 400 }
       );
     }
@@ -18,19 +21,28 @@ export async function POST(req: Request) {
     if (exists) {
       return NextResponse.json(
         { error: "Faculty already has a class in this slot" },
-        { status: 400 }
+        { status: 409 } // 409 Conflict is more suitable
+      );
+    }
+
+    // Check for room conflict as well
+    const roomTaken = await ScheduleEntry.findOne({ roomId, slot, day });
+    if (roomTaken) {
+      return NextResponse.json(
+        { error: "This room is already booked in this slot" },
+        { status: 409 }
       );
     }
 
     const entry = await ScheduleEntry.create({
       courseId,
       facultyId,
-      classroomId,
+      roomId, // ✅ FIX: Save 'roomId' to match the schema
       slot,
       day,
     });
 
-    return NextResponse.json({ success: true, entry });
+    return NextResponse.json({ success: true, entry }, { status: 201 });
   } catch (error) {
     console.error("Manual scheduling error:", error);
     return NextResponse.json(

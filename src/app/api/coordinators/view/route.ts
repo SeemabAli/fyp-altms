@@ -8,7 +8,7 @@ export async function GET() {
     const schedule = await ScheduleEntry.find()
       .populate("facultyId", "name designation")
       .populate("courseId", "code title")
-      .populate("classroomId", "name")
+      .populate("roomId", "name") // ✅ FIX: Changed "classroomId" to "roomId"
       .sort({ day: 1, slot: 1 });
 
     return NextResponse.json({ success: true, schedule });

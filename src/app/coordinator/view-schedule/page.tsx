@@ -8,7 +8,7 @@ interface Entry {
   _id: string;
   courseId: { code: string; title: string };
   facultyId: { name: string; designation: string };
-  classroomId: { name: string };
+  roomId: { name: string };
   day: string;
   slot: string;
 }
@@ -76,7 +76,7 @@ export default function ViewSchedulePage() {
                     <td className="px-4 py-3">
                       {entry.facultyId.name} ({entry.facultyId.designation})
                     </td>
-                    <td className="px-4 py-3">{entry.classroomId.name}</td>
+                    <td className="px-4 py-3">{entry.roomId?.name}</td>
                     <td className="px-4 py-3">{entry.day}</td>
                     <td className="px-4 py-3">{entry.slot}</td>
                   </tr>

@@ -33,19 +33,31 @@ export const signInSchema = z.object({
 });
 
 export const courseSchema = z.object({
-  code: z.string().min(2, "Course code is required"),
+  code: z
+    .string()
+    .min(2, "Course code is required")
+    .transform((s) => s.toUpperCase()),
   title: z.string().min(3, "Course title is required"),
-  enrollment: z.number().min(1, "Enrollment must be at least 1"),
+  enrollment: z.number().min(0, "Enrollment must be >= 0"),
   multimediaRequired: z.boolean(),
-  studentBatch: z.string().optional(),
+  studentBatch: z.string().optional().nullable(),
 });
 
 export const classroomSchema = z.object({
-  classroomId: z.string().min(2, "Classroom ID is required"),
-  building: z.string().min(2, "Building is required"),
-  capacity: z.number().min(1, "Capacity must be at least 1"),
-  multimedia: z.boolean(),
+  name: z.string().min(1, "Room name required").trim(),
+  capacity: z.number().min(1, "Capacity must be >= 1"),
+  type: z.enum(["classroom", "lab"], {
+    message: "Type must be 'classroom' or 'lab'",
+  }),
+  multimedia: z.boolean().default(false),
 });
+
+// For API validation
+export const createClassroomSchema = classroomSchema.omit({});
+
+// Type exports
+export type Classroom = z.infer<typeof classroomSchema>;
+export type CreateClassroomRequest = z.infer<typeof createClassroomSchema>;
 
 export const facultyPreferenceSchema = z.object({
   preferences: z
@@ -77,4 +89,8 @@ export const facultyProfileSchema = z.object({
     .nullable()
     .optional(),
   department: z.string().optional(),
+});
+export const enrollmentSchema = z.object({
+  studentId: z.string().min(1, "Student is required"),
+  courseId: z.string().min(1, "Course is required"),
 });
