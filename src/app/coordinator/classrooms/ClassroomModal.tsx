@@ -1,19 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { z } from "zod";
-
-const classroomSchema = z.object({
-  classroomId: z.string().min(2, "Classroom ID is required (e.g., B1-F0-01)"),
-  building: z.string().min(2, "Building is required (e.g., Block 1)"),
-  capacity: z.number().min(1, "Capacity must be at least 1"),
-  multimedia: z.boolean(),
-});
 
 interface Props {
   open: boolean;
@@ -22,174 +20,191 @@ interface Props {
   refresh: () => void;
 }
 
-export default function ClassroomModal({ open, setOpen, selected, refresh }: Props) {
+export default function ClassroomModal({
+  open,
+  setOpen,
+  selected,
+  refresh,
+}: Props) {
   const [form, setForm] = useState({
     classroomId: "",
-    building: "",
     capacity: "",
-    multimedia: false,
+    multimediaAvailable: false,
+    building: "",
+    availableSlots: [] as string[],
   });
-  const [loading, setLoading] = useState(false);
+  const [slotInput, setSlotInput] = useState("");
 
   useEffect(() => {
     if (selected) {
       setForm({
         classroomId: selected.classroomId || "",
+        capacity: selected.capacity || "",
+        multimediaAvailable: selected.multimediaAvailable || false,
         building: selected.building || "",
-        capacity: selected.capacity?.toString() || "",
-        multimedia: selected.multimedia || false,
+        availableSlots: selected.availableSlots || [],
       });
     } else {
       setForm({
         classroomId: "",
-        building: "",
         capacity: "",
-        multimedia: false,
+        multimediaAvailable: false,
+        building: "",
+        availableSlots: [],
       });
     }
   }, [selected]);
 
-  const handleSave = async () => {
-    const formData = { ...form, capacity: parseInt(form.capacity) || 0 };
+  const handleChange = (e: any) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
-    const parsed = classroomSchema.safeParse(formData);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message || "Invalid input");
-      return;
-    }
+  const addSlot = () => {
+    if (!slotInput.trim()) return;
+    setForm((prev) => ({
+      ...prev,
+      availableSlots: [...prev.availableSlots, slotInput.trim()],
+    }));
+    setSlotInput("");
+  };
 
-    setLoading(true);
+  const removeSlot = (slot: string) => {
+    setForm((prev) => ({
+      ...prev,
+      availableSlots: prev.availableSlots.filter((s) => s !== slot),
+    }));
+  };
+
+  const handleSubmit = async () => {
     try {
       const method = selected ? "PUT" : "POST";
-      const url = selected ? `/api/classrooms/${selected._id}` : "/api/classrooms";
-
+      const url = selected
+        ? `/api/coordinators/classrooms/${selected._id}`
+        : "/api/coordinators/classrooms";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify({
+          ...form,
+          capacity: Number(form.capacity),
+          availableSlots:
+            form.availableSlots.length > 0 ? form.availableSlots : ["ALL"],
+        }),
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Failed to ${selected ? "update" : "create"} classroom`);
-
-      toast.success(`Classroom ${selected ? "updated" : "created"} successfully`);
-      refresh();
+      if (!res.ok) throw new Error(data.message || "Failed");
+      toast.success(selected ? "Classroom updated" : "Classroom added");
       setOpen(false);
-    } catch (e: any) {
-      console.error("Error saving classroom:", e);
-      toast.error(e.message || "Error saving classroom");
-    } finally {
-      setLoading(false);
+      refresh();
+    } catch (err: any) {
+      toast.error(err.message);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg rounded-2xl shadow-2xl border border-[#d89860]/30">
         <DialogHeader>
-          <DialogTitle className="text-[#493737]">
-            {selected ? "Edit Classroom" : "Add New Classroom"}
+          <DialogTitle className="text-2xl font-bold text-[#493737]">
+            {selected ? "Edit Classroom" : "Add Classroom"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-5 py-4">
           {/* Classroom ID */}
-          <div className="space-y-2">
-            <Label htmlFor="classroomId">Classroom ID *</Label>
+          <div>
+            <Label className="font-semibold">Classroom ID</Label>
             <Input
-              id="classroomId"
+              name="classroomId"
               value={form.classroomId}
-              onChange={(e) => setForm({ ...form, classroomId: e.target.value })}
-              placeholder="e.g., B1-F0-01"
-              disabled={loading}
-            />
-            <p className="text-xs text-gray-500">
-              Format: Building-Floor-Room (e.g., B1-F0-01 for Block 1, Floor 0, Room 01)
-            </p>
-          </div>
-
-          {/* Building */}
-          <div className="space-y-2">
-            <Label htmlFor="building">Building *</Label>
-            <Input
-              id="building"
-              value={form.building}
-              onChange={(e) => setForm({ ...form, building: e.target.value })}
-              placeholder="e.g., Block 1"
-              disabled={loading}
+              onChange={handleChange}
+              className="mt-1 rounded-xl border-[#d89860]/40 focus:ring-[#d89860]"
+              placeholder="e.g. B1-F0-01"
             />
           </div>
 
-          {/* Capacity */}
-          <div className="space-y-2">
-            <Label htmlFor="capacity">Seating Capacity *</Label>
-            <Input
-              id="capacity"
-              type="number"
-              min="1"
-              max="500"
-              value={form.capacity}
-              onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-              placeholder="e.g., 50, 70"
-              disabled={loading}
-            />
-            <p className="text-xs text-gray-500">
-              Maximum number of students this classroom can accommodate
-            </p>
+          {/* Building + Capacity */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="font-semibold">Building</Label>
+              <Input
+                name="building"
+                value={form.building}
+                onChange={handleChange}
+                className="mt-1 rounded-xl border-[#d89860]/40"
+                placeholder="Block 1"
+              />
+            </div>
+            <div>
+              <Label className="font-semibold">Capacity</Label>
+              <Input
+                type="number"
+                name="capacity"
+                value={form.capacity}
+                onChange={handleChange}
+                className="mt-1 rounded-xl border-[#d89860]/40"
+                placeholder="70"
+              />
+            </div>
           </div>
 
           {/* Multimedia */}
-          <div className="space-y-2">
-            <Label className="text-base">Multimedia Availability</Label>
-            <div className="flex items-center space-x-3">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="multimedia"
-                  checked={form.multimedia === true}
-                  onChange={() => setForm({ ...form, multimedia: true })}
-                  disabled={loading}
-                  className="text-[#d89860]"
-                />
-                <span className="text-sm">Yes - Has multimedia equipment</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="multimedia"
-                  checked={form.multimedia === false}
-                  onChange={() => setForm({ ...form, multimedia: false })}
-                  disabled={loading}
-                  className="text-[#d89860]"
-                />
-                <span className="text-sm">No - No multimedia equipment</span>
-              </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="multimediaAvailable"
+              checked={form.multimediaAvailable}
+              onChange={handleChange}
+              className="h-4 w-4 accent-[#d89860]"
+            />
+            <Label className="font-semibold">Multimedia Available</Label>
+          </div>
+
+          {/* Available Slots */}
+          <div>
+            <Label className="font-semibold">Available Slots</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                value={slotInput}
+                onChange={(e) => setSlotInput(e.target.value)}
+                placeholder="e.g. 09:30am – 11:00am"
+                className="rounded-xl border-[#d89860]/40"
+              />
+              <button
+                onClick={addSlot}
+                type="button"
+                className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#d89860] to-[#e0a670] text-white text-sm"
+              >
+                Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {form.availableSlots.map((s, i) => (
+                <span
+                  key={i}
+                  className="bg-[#d89860]/20 text-[#493737] rounded-xl px-2 py-1 cursor-pointer inline-flex items-center"
+                  onClick={() => removeSlot(s)}
+                >
+                  {s} &nbsp;✕
+                </span>
+              ))}
+              {form.availableSlots.length === 0 && (
+                <span className="text-sm text-gray-500">Default: ALL</span>
+              )}
             </div>
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2">
+        <DialogFooter>
           <button
-            type="button"
-            onClick={() => setOpen(false)}
-            disabled={loading}
-            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+            onClick={handleSubmit}
+            className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#d89860] to-[#e0a670] text-white font-semibold shadow-md"
           >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={loading || !form.classroomId || !form.building || !form.capacity}
-            className="bg-[#d89860] text-white px-4 py-2 rounded hover:bg-[#c08850] disabled:opacity-50 flex items-center gap-2"
-          >
-            {loading && (
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            )}
-            {loading ? "Saving..." : "Save"}
+            {selected ? "Update Classroom" : "Add Classroom"}
           </button>
         </DialogFooter>
       </DialogContent>

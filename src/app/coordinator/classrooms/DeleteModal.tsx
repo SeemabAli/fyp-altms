@@ -1,83 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 
-interface Props {
-  open: boolean;
-  setOpen: (v: boolean) => void;
-  selected: any;
-  refresh: () => void;
-}
-
-export default function DeleteModal({ open, setOpen, selected, refresh }: Props) {
-  const [deleting, setDeleting] = useState(false);
-
+export default function DeleteModal({ open, setOpen, selected, refresh }: any) {
   const handleDelete = async () => {
-    if (!selected?._id) {
-      toast.error("No classroom selected");
-      return;
-    }
-
-    setDeleting(true);
     try {
-      const res = await fetch(`/api/classrooms/${selected._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/coordinators/classrooms/${selected._id}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete classroom");
-
-      toast.success("Classroom deleted successfully");
-      refresh();
+      if (!res.ok) throw new Error(data.message || "Failed");
+      toast.success("Classroom deleted");
       setOpen(false);
-    } catch (e: any) {
-      console.error("Error deleting classroom:", e);
-      toast.error(e.message || "Error deleting classroom");
-    } finally {
-      setDeleting(false);
+      refresh();
+    } catch (err: any) {
+      toast.error(err.message);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="rounded-2xl shadow-2xl border border-red-200">
         <DialogHeader>
-          <DialogTitle className="text-red-600">Delete Classroom</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-[#493737]">
+            Delete Classroom
+          </DialogTitle>
         </DialogHeader>
-
-        <div className="py-4">
-          <p className="text-gray-700">
-            Are you sure you want to delete classroom{" "}
-            <span className="font-semibold text-[#493737]">{selected?.classroomId}</span>?
-          </p>
-          <div className="mt-3 p-3 bg-red-50 rounded-md text-sm text-red-800">
-            <strong>Warning:</strong> This action cannot be undone.{" "}
-            {selected?.building && <span>This will remove it from {selected.building}.</span>}
-          </div>
-        </div>
-
-        <DialogFooter className="flex gap-2">
+        <p className="text-sm text-gray-600">
+          Are you sure you want to delete{" "}
+          <b className="text-[#d89860]">{selected?.classroomId}</b>?
+        </p>
+        <DialogFooter className="gap-2">
           <button
-            type="button"
             onClick={() => setOpen(false)}
-            disabled={deleting}
-            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+            className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-100 transition"
           >
             Cancel
           </button>
           <button
-            type="button"
             onClick={handleDelete}
-            disabled={deleting}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition"
           >
-            {deleting && (
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            )}
-            {deleting ? "Deleting..." : "Delete"}
+            Delete
           </button>
         </DialogFooter>
       </DialogContent>

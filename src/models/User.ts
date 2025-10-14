@@ -46,7 +46,6 @@ const UserSchema: Schema<IUser> = new Schema(
       ],
       default: null,
     },
-
     role: {
       type: String,
       enum: ["admin", "coordinator", "faculty", "student"],
@@ -58,14 +57,9 @@ const UserSchema: Schema<IUser> = new Schema(
     },
   },
   {
-    timestamps: true, // adds createdAt & updatedAt
+    timestamps: true,
   }
 );
-
-// 🔹 Ensure unique email index
-UserSchema.index({ email: 1 }, { unique: true });
-
-// 🔹 Prevent model overwrite in dev hot-reload
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 

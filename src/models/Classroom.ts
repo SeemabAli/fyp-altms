@@ -1,24 +1,47 @@
 // src/models/Classroom.ts
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IClassroom extends Document {
   classroomId: string;
-  building: string;
   capacity: number;
-  multimedia: boolean;
+  multimediaAvailable: boolean;
+  building?: string | null;
+  availableSlots?: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const ClassroomSchema: Schema<IClassroom> = new Schema(
+const ClassroomSchema = new Schema<IClassroom>(
   {
-    classroomId: { type: String, required: true, unique: true }, // e.g. B1-F0-01
-    building: { type: String, required: true }, // e.g. Block 1
-    capacity: { type: Number, required: true },
-    multimedia: { type: Boolean, required: true },
+    classroomId: {
+      type: String,
+      required: true,
+      unique: true, // ✅ enforce uniqueness
+      trim: true,
+    },
+    capacity: {
+      type: Number,
+      required: true,
+    },
+    multimediaAvailable: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    building: {
+      type: String,
+      default: null,
+    },
+    availableSlots: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );
 
-const Classroom: Model<IClassroom> =
-  mongoose.models.Classroom || mongoose.model<IClassroom>("Classroom", ClassroomSchema);
+const Classroom =
+  mongoose.models.Classroom ||
+  mongoose.model<IClassroom>("Classroom", ClassroomSchema);
 
 export default Classroom;

@@ -24,7 +24,7 @@ export default function Home() {
           router.push("/faculty/dashboard");
           break;
         case "student":
-          router.push("/student/dashboard");
+          router.push("/student/timetable");
           break;
       }
     }

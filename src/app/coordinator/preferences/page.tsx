@@ -1,31 +1,38 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import { Clock } from "lucide-react";
 import toast from "react-hot-toast";
-import PreferenceModal from "./PreferenceModal";
+
+interface FacultyPreference {
+  _id: string;
+  facultyId: {
+    name: string;
+    email: string;
+    designation: string;
+  };
+  courses: { _id: string; code: string; title: string }[];
+  timestamp: string;
+}
 
 export default function CoordinatorPreferencesPage() {
-  const [faculties, setFaculties] = useState<any[]>([]);
+  const [preferences, setPreferences] = useState<FacultyPreference[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<any>(null);
-  const [open, setOpen] = useState(false);
 
   const fetchPreferences = async () => {
     try {
-      setLoading(true);
-      const res = await fetch("/api/preferences", { cache: "no-store" });
+      const res = await fetch("/api/coordinators/preferences");
       const data = await res.json();
       if (res.ok) {
-        setFaculties(data);
+        setPreferences(data.preferences || []);
       } else {
-        toast.error(data.error || "Failed to fetch preferences");
+        toast.error(data.error || "Failed to fetch");
       }
-    } catch (err) {
-      console.error("Fetch preferences error:", err);
-      toast.error("Failed to fetch preferences");
+    } catch {
+      toast.error("Failed to load preferences");
     } finally {
       setLoading(false);
     }
@@ -37,99 +44,117 @@ export default function CoordinatorPreferencesPage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* header */}
-      <div className="bg-[#493737] text-white px-6 py-4 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* HEADER */}
+      <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
+        <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
-              alt="logo"
-              className="w-7 h-auto"
+              alt="VU Logo"
+              className="w-8 h-auto"
             />
           </div>
-          <span className="text-lg font-semibold">Automated Timetable System</span>
+          <span className="text-lg font-semibold">
+            Automated Timetable System
+          </span>
         </div>
-
-        <button className="px-4 py-2 rounded text-sm">
-          <LogoutButton />
-        </button>
+        <LogoutButton />
       </div>
 
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="bg-white p-6 rounded-xl mb-6 border-l-4 shadow-sm border-[#d89860]">
-          <h1 className="text-2xl font-semibold text-[#493737]">Faculty Preferences</h1>
-          <p className="text-sm text-gray-600">
-            View all faculty course preferences (each faculty should submit exactly 5 preferences).
-          </p>
-        </div>
+      {/* MAIN */}
+      <div className="min-h-screen p-6 bg-gradient-to-br from-white via-gray-50 to-gray-100">
+        <div className="max-w-7xl mx-auto">
+          {/* HEADER SECTION */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-[#493737] mb-2">
+              Faculty Preferences
+            </h1>
+            <p className="text-gray-600">
+              Review all submitted faculty course preferences with timestamps
+              and designations.
+            </p>
+          </div>
 
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-[#493737] font-medium">Total Faculty: {faculties.length}</div>
-          <button
-            onClick={fetchPreferences}
-            className="px-4 py-2 rounded bg-[#d89860] text-white hover:bg-[#c08850] transition"
-          >
-            Refresh
-          </button>
-        </div>
-
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          {loading ? (
-            <div className="p-8 text-center">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#d89860]" />
-              <p className="mt-2 text-gray-600">Loading preferences...</p>
-            </div>
-          ) : faculties.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <p>No faculty data found.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead className="bg-gray-50">
+          {/* TABLE */}
+          <div className="bg-white/90 rounded-2xl shadow-xl overflow-x-auto">
+            <table className="w-full text-sm text-[#493737]">
+              <thead className="bg-[#493737] text-white">
+                <tr>
+                  <th className="px-4 py-3 text-left">#</th>
+                  <th className="px-4 py-3 text-left">Faculty Name</th>
+                  <th className="px-4 py-3 text-left">Email</th>
+                  <th className="px-4 py-3 text-left">Designation</th>
+                  <th className="px-4 py-3 text-left">Preferred Courses</th>
+                  <th className="px-4 py-3 text-left">Submitted At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
                   <tr>
-                    <th className="p-4 text-left font-medium text-gray-700 border-b">#</th>
-                    <th className="p-4 text-left font-medium text-gray-700 border-b">Name</th>
-                    <th className="p-4 text-left font-medium text-gray-700 border-b">Email</th>
-                    <th className="p-4 text-left font-medium text-gray-700 border-b">Department</th>
-                    <th className="p-4 text-left font-medium text-gray-700 border-b">Preferences</th>
-                    <th className="p-4 text-center font-medium text-gray-700 border-b">Actions</th>
+                    <td colSpan={6} className="text-center py-12 text-gray-500">
+                      Loading preferences...
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {faculties.map((f, idx) => (
-                    <tr key={f._id} className="border-b hover:bg-gray-50">
-                      <td className="p-4">{idx + 1}</td>
-                      <td className="p-4 font-semibold text-[#493737]">{f.name}</td>
-                      <td className="p-4 text-gray-600">{f.email}</td>
-                      <td className="p-4 text-gray-600">{f.department}</td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 bg-[#fff3e8] text-[#a86b33] rounded-full text-sm">
-                          {Array.isArray(f.preferences) ? f.preferences.length : 0} submitted
+                ) : preferences.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-12 text-gray-500">
+                      No preferences submitted yet.
+                    </td>
+                  </tr>
+                ) : (
+                  preferences.map((pref, idx) => (
+                    <tr
+                      key={pref._id}
+                      className="border-b hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-4">{idx + 1}</td>
+                      <td className="px-4 py-4 font-medium">
+                        {pref.facultyId.name}
+                      </td>
+                      <td className="px-4 py-4 text-gray-600">
+                        {pref.facultyId.email}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="px-3 py-1 bg-[#d89860]/15 text-[#493737] rounded-full text-xs font-semibold">
+                          {pref.facultyId.designation || "—"}
                         </span>
                       </td>
-                      <td className="p-4 text-center">
-                        <button
-                          onClick={() => {
-                            setSelected(f);
-                            setOpen(true);
-                          }}
-                          className="px-3 py-1 bg-[#d89860] text-white rounded hover:bg-[#c08850] transition-colors text-sm"
-                        >
-                          View Preferences
-                        </button>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          {pref.courses.length > 0 ? (
+                            pref.courses.map((course) => (
+                              <span
+                                key={course._id}
+                                className="inline-flex items-center px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                              >
+                                <span className="font-bold text-blue-600 mr-1">
+                                  {course.code}
+                                </span>
+                                <span className="hidden sm:inline">
+                                  {course.title}
+                                </span>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-gray-400 text-xs">
+                              No courses
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-xs text-gray-500 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <Clock size={14} className="text-[#d89860]" />
+                          {new Date(pref.timestamp).toLocaleString()}
+                        </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        {/* Modal */}
-        <PreferenceModal open={open} setOpen={setOpen} faculty={selected} />
       </div>
     </ProtectedRoute>
   );
