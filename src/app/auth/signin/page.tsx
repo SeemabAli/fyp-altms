@@ -96,7 +96,7 @@ export default function SignInPage() {
           admin: "/admin/dashboard",
           coordinator: "/coordinator/dashboard",
           faculty: "/faculty/dashboard",
-          student: "/student/dashboard",
+          student: "/student/timetable",
         };
 
         const redirectUrl =

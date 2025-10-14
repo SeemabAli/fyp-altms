@@ -11,7 +11,7 @@ export default async function DashboardRedirect() {
   if (role === "admin") return redirect("/admin/dashboard");
   if (role === "coordinator") return redirect("/dashboard/coordinator");
   if (role === "faculty") return redirect("/faculty/dashboard");
-  if (role === "student") return redirect("/student/dashboard");
+  if (role === "student") return redirect("/student/timetable");
   // fallback
   return redirect("/unauthorized");
 }

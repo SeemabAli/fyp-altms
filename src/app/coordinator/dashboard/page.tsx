@@ -81,8 +81,8 @@ export default function CoordinatorDashboard() {
       icon: BookX,
     },
     {
-      href: "/coordinator/unscheduled/classrooms",
-      title: "Unscheduled Classrooms",
+      href: "/coordinator/timeslot",
+      title: "Manage Timeslots",
       desc: "View rooms and slots still available after scheduling.",
       icon: CalendarX,
     },
