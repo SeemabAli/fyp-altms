@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Eye, EyeOff, Mail, Lock, AlertCircle, LogIn } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface FormErrors {
   email?: string;
@@ -89,6 +90,9 @@ export default function SignInPage() {
       });
 
       if (!res?.error) {
+        // ✅ Success toast
+        toast.success("Signed in successfully!", { duration: 4000 });
+
         const sessionRes = await fetch("/api/auth/session");
         const session = await sessionRes.json();
 
@@ -105,9 +109,15 @@ export default function SignInPage() {
         router.push(redirectUrl);
         router.refresh();
       } else {
+        // ❌ Invalid credentials toast
+        toast.error("Invalid email or password!", { duration: 4000 });
         setErrors({ general: "Invalid email or password. Please try again." });
       }
     } catch {
+      // ⚠️ Unexpected error toast
+      toast.error("User not found or unexpected error occurred!", {
+        duration: 4000,
+      });
       setErrors({ general: "An unexpected error occurred. Please try again." });
     } finally {
       setLoading(false);
@@ -162,6 +172,7 @@ export default function SignInPage() {
               </div>
             )}
 
+            {/* FORM START */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
               <div>
