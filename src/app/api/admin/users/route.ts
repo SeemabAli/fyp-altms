@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongoose";
+import FacultyPreference from "@/models/Faculty";
 
+// =================== GET (Fetch Users) ===================
 export async function GET() {
   try {
     await connectDB();
-    // Include tempPassword field to show plaintext passwords
     const users = await User.find({})
       .select("name email role designation batch createdAt")
       .sort({ createdAt: -1 });
@@ -21,6 +22,7 @@ export async function GET() {
   }
 }
 
+// =================== POST (Create User) ===================
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -50,7 +52,6 @@ export async function POST(req: Request) {
       designation: role === "faculty" ? designation : null,
     });
 
-    // Return user with tempPassword for display
     return NextResponse.json({
       success: true,
       user: {
@@ -68,6 +69,42 @@ export async function POST(req: Request) {
     console.error("Error creating user:", error);
     return NextResponse.json(
       { error: "Failed to create user" },
+      { status: 500 }
+    );
+  }
+}
+
+// =================== DELETE (Delete User + Cleanup) ===================
+export async function DELETE(req: Request) {
+  try {
+    await connectDB();
+    const { id } = await req.json(); // id passed in body
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // If faculty, delete all their saved preferences
+    if (user.role === "faculty") {
+      await FacultyPreference.deleteMany({ facultyId: user._id });
+      console.log(`Deleted all FacultyPreferences for ${user.name}`);
+    }
+
+    await User.findByIdAndDelete(id);
+
+    return NextResponse.json({
+      success: true,
+      message: "User and related preferences deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
       { status: 500 }
     );
   }

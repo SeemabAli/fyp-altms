@@ -11,13 +11,20 @@ interface Props {
   refresh: () => void;
 }
 
-export default function UserDeleteModal({ open, setOpen, selected, refresh }: Props) {
+export default function UserDeleteModal({
+  open,
+  setOpen,
+  selected,
+  refresh,
+}: Props) {
   const handleDelete = async () => {
     if (!selected?._id) return toast.error("No user selected");
 
     try {
-      const res = await fetch(`/api/admin/users/${selected._id}`, {
+      const res = await fetch(`/api/admin/users`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selected._id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete");
