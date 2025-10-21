@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-ignore - allow importing global CSS without type declarations
 import "./globals.css";
 import Providers from "@/components/Providers";
 import type { Metadata } from "next";
