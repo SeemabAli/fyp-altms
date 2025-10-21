@@ -1,8 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { Eye, EyeOff, Mail, Lock, AlertCircle, LogIn } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -135,13 +135,11 @@ export default function SignInPage() {
         <div className="text-center mb-8">
           <div className="inline-flex flex-col items-center gap-4 mb-6">
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg ring-4 ring-white/20 overflow-hidden">
-              <Image
+              <img
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
+                width={120}
+                style={{ height: "auto" }}
                 alt="VU Logo"
-                width={60}
-                height={60}
-                className="w-3/4 h-auto object-contain"
-                priority
               />
             </div>
             <div>
