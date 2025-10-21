@@ -36,7 +36,7 @@ export default function DeleteModal({ open, setOpen, selected, refresh }: any) {
         </DialogHeader>
         <p className="text-sm text-gray-600">
           Are you sure you want to delete{" "}
-          <b className="text-[#d89860]">{selected?.classroomId}</b>?
+          <b className="text-[#d89860]">{selected?.name}</b>? {/* ✅ FIXED */}
         </p>
         <DialogFooter className="gap-2">
           <button

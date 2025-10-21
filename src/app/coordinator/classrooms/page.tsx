@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import toast from "react-hot-toast";
-import { Loader2, Plus, Edit2, Trash2, Clock } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Clock } from "lucide-react";
+import DeleteModal from "./DeleteModal";
 
 interface TimeSlot {
   startTime: string;
@@ -32,7 +33,17 @@ export default function CoordinatorClassroomsPage() {
     type: "classroom",
     multimedia: false,
   });
+
+  // new fields for structured naming
+  const [buildingNo, setBuildingNo] = useState("");
+  const [floorNo, setFloorNo] = useState("");
+  const [roomNo, setRoomNo] = useState("");
+
   const [saving, setSaving] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(
+    null
+  );
 
   const fetchClassrooms = async () => {
     try {
@@ -58,32 +69,36 @@ export default function CoordinatorClassroomsPage() {
       type: "classroom",
       multimedia: false,
     });
+    setBuildingNo("");
+    setFloorNo("");
+    setRoomNo("");
     setEditingId(null);
   };
 
   const handleSubmit = async () => {
-    if (!newRoom.name || !newRoom.capacity) {
-      toast.error("Name and capacity are required");
+    if (!buildingNo || !floorNo || !roomNo || !newRoom.capacity) {
+      toast.error("Please fill all required fields");
       return;
     }
 
+    // generate name automatically
+    const generatedName = `B${buildingNo}-F${floorNo}-R${roomNo}`;
+
     setSaving(true);
     try {
-      const url = editingId
-        ? `/api/coordinators/classrooms`
-        : `/api/coordinators/classrooms`;
+      const url = `/api/coordinators/classrooms`;
       const method = editingId ? "PUT" : "POST";
 
       const body = editingId
         ? {
             id: editingId,
-            name: newRoom.name,
+            name: generatedName,
             capacity: Number(newRoom.capacity),
             type: newRoom.type,
             multimedia: newRoom.multimedia,
           }
         : {
-            name: newRoom.name,
+            name: generatedName,
             capacity: Number(newRoom.capacity),
             type: newRoom.type,
             multimedia: newRoom.multimedia,
@@ -117,28 +132,26 @@ export default function CoordinatorClassroomsPage() {
       type: classroom.type,
       multimedia: classroom.multimedia,
     });
+
+    // auto-extract numbers if name format matches B1-F2-R8
+    const match = classroom.name.match(/B(\d+)-F(\d+)-R(\d+)/);
+    if (match) {
+      setBuildingNo(match[1]);
+      setFloorNo(match[2]);
+      setRoomNo(match[3]);
+    } else {
+      setBuildingNo("");
+      setFloorNo("");
+      setRoomNo("");
+    }
+
     setEditingId(classroom._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this classroom?")) return;
-
-    try {
-      const res = await fetch(`/api/coordinator/classrooms?id=${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Classroom deleted");
-        fetchClassrooms();
-      } else {
-        toast.error(data.error || "Failed to delete classroom");
-      }
-    } catch {
-      toast.error("Failed to delete classroom");
-    }
+  const handleDeleteClick = (room: Classroom) => {
+    setSelectedClassroom(room);
+    setOpenDelete(true);
   };
 
   return (
@@ -175,46 +188,122 @@ export default function CoordinatorClassroomsPage() {
         </div>
 
         {/* FORM */}
+        {/* FORM */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
           <h2 className="text-lg font-semibold text-[#493737] mb-4 flex items-center gap-2">
             <Plus className="text-[#d89860]" />
             {editingId ? "Edit Room" : "Add New Room"}
           </h2>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <input
-              placeholder="Room Name (e.g., CS-101)"
-              className="border rounded-lg px-3 py-2"
-              value={newRoom.name}
-              onChange={(e) => setNewRoom({ ...newRoom, name: e.target.value })}
-            />
-            <input
-              type="number"
-              placeholder="Capacity"
-              className="border rounded-lg px-3 py-2"
-              value={newRoom.capacity}
-              onChange={(e) =>
-                setNewRoom({ ...newRoom, capacity: e.target.value })
-              }
-            />
-            <select
-              className="border rounded-lg px-3 py-2"
-              value={newRoom.type}
-              onChange={(e) => setNewRoom({ ...newRoom, type: e.target.value })}
-            >
-              <option value="classroom">Classroom</option>
-              <option value="lab">Lab</option>
-            </select>
-            <label className="flex items-center gap-2 text-sm">
+            {/* Building / Floor / Room */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Building No
+              </label>
               <input
-                type="checkbox"
-                checked={newRoom.multimedia}
-                onChange={(e) =>
-                  setNewRoom({ ...newRoom, multimedia: e.target.checked })
-                }
+                type="number"
+                placeholder="Enter building no"
+                className="border rounded-lg px-3 py-2 w-full"
+                value={buildingNo}
+                onChange={(e) => {
+                  const value = Math.abs(Number(e.target.value));
+                  setBuildingNo(value ? value.toString() : "");
+                }}
               />
-              Multimedia Available
-            </label>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Floor No
+              </label>
+              <input
+                type="number"
+                placeholder="Enter floor no"
+                className="border rounded-lg px-3 py-2 w-full"
+                value={floorNo}
+                onChange={(e) => {
+                  const value = Math.abs(Number(e.target.value));
+                  setFloorNo(value ? value.toString() : "");
+                }}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Room No
+              </label>
+              <input
+                type="number"
+                placeholder="Enter room no"
+                className="border rounded-lg px-3 py-2 w-full"
+                value={roomNo}
+                onChange={(e) => {
+                  const value = Math.abs(Number(e.target.value));
+                  setRoomNo(value ? value.toString() : "");
+                }}
+              />
+            </div>
+
+            {/* Capacity */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Capacity
+              </label>
+              <input
+                type="number"
+                placeholder="Enter capacity"
+                className="border rounded-lg px-3 py-2"
+                value={newRoom.capacity}
+                onChange={(e) => {
+                  const value = Math.abs(Number(e.target.value));
+                  setNewRoom({ ...newRoom, capacity: value.toString() });
+                }}
+              />
+            </div>
+
+            {/* Type */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Type</label>
+              <select
+                className="border rounded-lg px-3 py-2"
+                value={newRoom.type}
+                onChange={(e) =>
+                  setNewRoom({ ...newRoom, type: e.target.value })
+                }
+              >
+                <option value="classroom">Classroom</option>
+                <option value="lab">Lab</option>
+              </select>
+            </div>
+
+            {/* Multimedia */}
+            <div className="flex flex-col gap-2 justify-end">
+              <label className="text-sm font-medium text-gray-700">
+                Multimedia
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={newRoom.multimedia}
+                  onChange={(e) =>
+                    setNewRoom({ ...newRoom, multimedia: e.target.checked })
+                  }
+                />
+                Available
+              </label>
+            </div>
           </div>
+
+          {/* Preview the generated name */}
+          {buildingNo && floorNo && roomNo && (
+            <p className="text-sm text-gray-600 mt-2">
+              <span className="font-semibold text-[#493737]">
+                B{buildingNo}-F{floorNo}-R{roomNo}
+              </span>
+            </p>
+          )}
+
           <div className="flex gap-2 mt-4">
             <button
               onClick={handleSubmit}
@@ -293,18 +382,18 @@ export default function CoordinatorClassroomsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex justify-center gap-3">
                         <button
                           onClick={() => handleEdit(room)}
-                          className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition"
+                          className="text-[#d89860] hover:text-[#c08850]"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => handleDelete(room._id)}
-                          className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition"
+                          onClick={() => handleDeleteClick(room)}
+                          className="text-red-500 hover:text-red-700"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </td>
@@ -315,6 +404,14 @@ export default function CoordinatorClassroomsPage() {
           </table>
         </div>
       </div>
+      {selectedClassroom && (
+        <DeleteModal
+          open={openDelete}
+          setOpen={setOpenDelete}
+          selected={selectedClassroom}
+          refresh={fetchClassrooms}
+        />
+      )}
     </ProtectedRoute>
   );
 }
