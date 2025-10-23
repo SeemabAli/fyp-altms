@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import FacultyPreference from "@/models/Faculty";
 
+import "@/models/Course";
+
 export async function GET() {
   try {
     await connectDB();
