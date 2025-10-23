@@ -3,17 +3,21 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Loader2, X } from "lucide-react";
 import { z } from "zod";
 
 const courseSchema = z.object({
-  code: z.string().min(2, "Course code is required (e.g., CS201)"),
+  code: z
+    .string()
+    .min(2, "Course code is required")
+    .transform((s) => s.toUpperCase()),
   title: z.string().min(3, "Course title is required"),
-  enrollment: z.number().min(1, "Enrollment must be at least 1"),
+  enrollment: z.number().min(1, "Enrollment must be >= 1"),
   multimediaRequired: z.boolean(),
-  studentBatch: z.string().optional().nullable(),
+  studentBatch: z.string().min(2, "Student batch / semester is required"),
+  creditHours: z.number().min(1).max(4, "Credit hours must be between 1–4"),
 });
 
 interface Props {
@@ -35,9 +39,9 @@ export default function CourseModal({
     enrollment: "",
     multimediaRequired: false,
     studentBatch: "",
+    creditHours: 3,
   });
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     if (selected) {
       setForm({
@@ -46,6 +50,7 @@ export default function CourseModal({
         enrollment: selected.enrollment?.toString() || "",
         multimediaRequired: !!selected.multimediaRequired,
         studentBatch: selected.studentBatch || "",
+        creditHours: selected.creditHours || 3,
       });
     } else {
       setForm({
@@ -54,17 +59,19 @@ export default function CourseModal({
         enrollment: "",
         multimediaRequired: false,
         studentBatch: "",
+        creditHours: 3,
       });
     }
   }, [selected]);
 
   const handleSave = async () => {
     const payload = {
-      code: form.code.toUpperCase().trim(),
+      code: form.code.trim().toUpperCase(),
       title: form.title.trim(),
       enrollment: parseInt(form.enrollment || "0", 10) || 0,
       multimediaRequired: form.multimediaRequired,
-      studentBatch: form.studentBatch?.trim() || undefined,
+      studentBatch: form.studentBatch.trim(),
+      creditHours: Number(form.creditHours),
     };
 
     const parsed = courseSchema.safeParse(payload);
@@ -86,7 +93,13 @@ export default function CourseModal({
         body: JSON.stringify(parsed.data),
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = {};
+      }
+
       if (!res.ok)
         throw new Error(
           data?.error ||
@@ -96,6 +109,8 @@ export default function CourseModal({
 
       toast.success(`Course ${selected ? "updated" : "created"} successfully`);
       refresh();
+      setOpen(false);
+
       setOpen(false);
     } catch (err: any) {
       console.error("save course error:", err);
@@ -149,7 +164,7 @@ export default function CourseModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label>Student Batch (optional)</Label>
+              <Label>Student Batch / Semester *</Label>
               <Input
                 value={form.studentBatch}
                 onChange={(e) =>
@@ -173,6 +188,23 @@ export default function CourseModal({
                 disabled={loading}
               />
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label>Credit Hours *</Label>
+            <select
+              value={form.creditHours}
+              onChange={(e) =>
+                setForm({ ...form, creditHours: Number(e.target.value) })
+              }
+              className="border rounded-lg px-3 py-2 w-full"
+              disabled={loading}
+            >
+              <option value={1}>1 Credit Hour</option>
+              <option value={2}>2 Credit Hours</option>
+              <option value={3}>3 Credit Hours</option>
+              <option value={4}>4 Credit Hours</option>
+            </select>
           </div>
 
           <div className="space-y-1">
