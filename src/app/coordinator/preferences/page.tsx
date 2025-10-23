@@ -41,6 +41,26 @@ export default function CoordinatorPreferencesPage() {
   useEffect(() => {
     fetchPreferences();
   }, []);
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this preference?")) return;
+
+    try {
+      const res = await fetch(`/api/coordinators/preferences/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Preference deleted successfully");
+        setPreferences((prev) => prev.filter((p) => p._id !== id));
+      } else {
+        toast.error(data.error || "Failed to delete");
+      }
+    } catch {
+      toast.error("Error deleting preference");
+    }
+  };
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
@@ -86,18 +106,19 @@ export default function CoordinatorPreferencesPage() {
                   <th className="px-4 py-3 text-left">Designation</th>
                   <th className="px-4 py-3 text-left">Preferred Courses</th>
                   <th className="px-4 py-3 text-left">Submitted At</th>
+                  <th className="px-4 py-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-gray-500">
+                    <td colSpan={7} className="text-center py-12 text-gray-500">
                       Loading preferences...
                     </td>
                   </tr>
                 ) : preferences.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-gray-500">
+                    <td colSpan={7} className="text-center py-12 text-gray-500">
                       No preferences submitted yet.
                     </td>
                   </tr>
@@ -109,14 +130,14 @@ export default function CoordinatorPreferencesPage() {
                     >
                       <td className="px-4 py-4">{idx + 1}</td>
                       <td className="px-4 py-4 font-medium">
-                        {pref.facultyId.name}
+                        {pref.facultyId?.name}
                       </td>
                       <td className="px-4 py-4 text-gray-600">
-                        {pref.facultyId.email}
+                        {pref.facultyId?.email}
                       </td>
                       <td className="px-4 py-4">
                         <span className="px-3 py-1 bg-[#d89860]/15 text-[#493737] rounded-full text-xs font-semibold">
-                          {pref.facultyId.designation || "—"}
+                          {pref.facultyId?.designation || "—"}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -147,6 +168,14 @@ export default function CoordinatorPreferencesPage() {
                           <Clock size={14} className="text-[#d89860]" />
                           {new Date(pref.timestamp).toLocaleString()}
                         </div>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <button
+                          onClick={() => handleDelete(pref._id)}
+                          className="px-3 py-1 text-xs bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))
