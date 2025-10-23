@@ -8,13 +8,17 @@ import LogoutButton from "@/components/LogoutButton";
 
 interface TimetableEntry {
   _id: string;
-  courseCode: string;
-  courseTitle: string;
-  room: string;
   day: string;
-  startTime: string;
-  endTime: string;
-  batch?: string;
+  slot: string;
+  courseId?: {
+    _id: string;
+    code: string;
+    title: string;
+  };
+  roomId?: {
+    _id: string;
+    name: string;
+  };
 }
 
 export default function FacultyTimetable() {
@@ -27,9 +31,9 @@ export default function FacultyTimetable() {
       try {
         const res = await fetch("/api/faculty/timetable");
         const data = await res.json();
-        setTimetable(data.timetable || []);
-      } catch {
-        console.error("Failed to fetch timetable");
+        if (data.success) setTimetable(data.timetable || []);
+      } catch (err) {
+        console.error("Failed to fetch timetable:", err);
       } finally {
         setLoading(false);
       }
@@ -37,10 +41,16 @@ export default function FacultyTimetable() {
     fetchTimetable();
   }, []);
 
+  // Sort by weekday order
+  const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const sortedTimetable = [...timetable].sort(
+    (a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day)
+  );
+
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
       {/* HEADER */}
-      <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
+      <div className="bg-[#3d2e2e] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
@@ -53,15 +63,16 @@ export default function FacultyTimetable() {
             Automated Timetable System
           </span>
         </div>
-        <button className="px-4 py-2 rounded text-sm">
+        <button className="px-4 py-2rounded text-sm transition">
           <LogoutButton />
         </button>
       </div>
 
-      {/* MAIN CONTAINER */}
+      {/* MAIN CONTENT */}
       <div className="max-w-6xl mx-auto p-6">
-        <div className="bg-white p-6 rounded-xl mb-6 border-l-4 shadow-sm border-[#d89860]">
-          <h1 className="text-2xl font-semibold text-[#493737]">
+        {/* Card Header */}
+        <div className="bg-white p-6 rounded-xl mb-6 border-l-4 border-[#d89860] shadow-sm">
+          <h1 className="text-2xl font-semibold text-[#3d2e2e]">
             My Timetable
           </h1>
           <p className="text-sm text-gray-600">
@@ -76,42 +87,42 @@ export default function FacultyTimetable() {
           )}
         </div>
 
-        {/* Timetable Table */}
+        {/* Timetable */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           {loading ? (
             <div className="text-center py-10 text-gray-500">
               Loading timetable...
             </div>
-          ) : timetable.length === 0 ? (
+          ) : sortedTimetable.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
               No timetable available yet.
             </div>
           ) : (
-            <table className="w-full border-collapse">
-              <thead className="bg-[#493737] text-white text-sm">
-                <tr>
-                  <th className="px-4 py-3 text-left">Day</th>
-                  <th className="px-4 py-3 text-left">Time</th>
-                  <th className="px-4 py-3 text-left">Course</th>
-                  <th className="px-4 py-3 text-left">Room</th>
-                  <th className="px-4 py-3 text-left">Batch</th>
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-[#3d2e2e] text-white">
+                  <th className="px-5 py-3 text-left font-semibold">Day</th>
+                  <th className="px-5 py-3 text-left font-semibold">
+                    Time Slot
+                  </th>
+                  <th className="px-5 py-3 text-left font-semibold">Course</th>
+                  <th className="px-5 py-3 text-left font-semibold">Room</th>
                 </tr>
               </thead>
               <tbody>
-                {timetable.map((entry) => (
+                {sortedTimetable.map((entry, idx) => (
                   <tr
                     key={entry._id}
-                    className="border-b hover:bg-gray-50 transition-colors"
+                    className={`border-b hover:bg-[#f9f6f3] transition ${
+                      idx % 2 === 0 ? "bg-white" : "bg-[#fdfaf7]"
+                    }`}
                   >
-                    <td className="px-4 py-3">{entry.day}</td>
-                    <td className="px-4 py-3">
-                      {entry.startTime} - {entry.endTime}
+                    <td className="px-5 py-3">{entry.day}</td>
+                    <td className="px-5 py-3">{entry.slot}</td>
+                    <td className="px-5 py-3">
+                      {entry.courseId?.title || "—"}
                     </td>
-                    <td className="px-4 py-3">
-                      {entry.courseCode} — {entry.courseTitle}
-                    </td>
-                    <td className="px-4 py-3">{entry.room}</td>
-                    <td className="px-4 py-3">{entry.batch || "N/A"}</td>
+                    <td className="px-5 py-3">{entry.roomId?.name || "—"}</td>
                   </tr>
                 ))}
               </tbody>
