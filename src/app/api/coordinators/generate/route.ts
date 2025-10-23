@@ -1,63 +1,120 @@
-
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
-import ScheduleEntry, { IScheduleEntry } from "@/models/ScheduleEntry"; // Import IScheduleEntry
-import FacultyPreference from "@/models/Faculty";
+import ScheduleEntry from "@/models/ScheduleEntry";
 import Course from "@/models/Course";
 import Classroom from "@/models/Classroom";
+import FacultyPreference from "@/models/Faculty";
 
 export async function POST() {
   try {
     await connectDB();
 
-    // Fetch existing data
-    const preferences = await FacultyPreference.find().populate("facultyId");
-    const courses = await Course.find();
-    const rooms = await Classroom.find();
+    const preferences = await FacultyPreference.find()
+      .populate("facultyId")
+      .lean();
+    const courses = await Course.find().lean();
+    const rooms = await Classroom.find().lean();
 
     if (!preferences.length || !courses.length || !rooms.length) {
       return NextResponse.json(
-        { error: "Insufficient data to generate schedule" },
+        { success: false, error: "Insufficient data to generate schedule" },
         { status: 400 }
       );
     }
 
-    // Suggestion: Use the proper type instead of 'any' for type safety
-    const generated: IScheduleEntry[] = [];
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const slots = ["08:00-09:30", "10:00-11:30", "12:00-13:30"];
+    let dayIndex = 0;
+    let slotIndex = 0;
+    let generatedCount = 0;
 
+    // ✅ Loop over all preferences
     for (const pref of preferences) {
       const faculty = pref.facultyId;
-      const selectedCourses = pref.courses.slice(0, 2);
-      for (const courseId of selectedCourses) {
-        const room = rooms[Math.floor(Math.random() * rooms.length)];
-        const slot = ["08:00-09:30", "10:00-11:30", "12:00-13:30"][
-          Math.floor(Math.random() * 3)
-        ];
-        const day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][
-          Math.floor(Math.random() * 5)
-        ];
+      if (!faculty || !pref.courses?.length) continue;
 
-        const entry = await ScheduleEntry.create({
+      const selectedCourses = pref.courses.slice(0, 3); // pick 2–3
+
+      for (const courseId of selectedCourses) {
+        // Skip if already scheduled for this faculty
+        const already = await ScheduleEntry.findOne({
+          facultyId: faculty._id,
+          courseId,
+        });
+        if (already) continue;
+
+        // Assign day and slot in round-robin (balanced)
+        const day = days[dayIndex % days.length];
+        const slot = slots[slotIndex % slots.length];
+        const room = rooms[Math.floor(Math.random() * rooms.length)];
+
+        // Prevent conflicts — ensure same room+slot+day isn’t reused
+        const conflict = await ScheduleEntry.findOne({
+          day,
+          slot,
+          roomId: room._id,
+        });
+        if (conflict) {
+          // shift to next day if conflict found
+          dayIndex++;
+          continue;
+        }
+
+        await ScheduleEntry.create({
           courseId,
           facultyId: faculty._id,
           roomId: room._id,
-          slot,
           day,
+          slot,
         });
 
-        generated.push(entry);
+        generatedCount++;
+
+        // Rotate day/slot for next entry
+        dayIndex++;
+        if (dayIndex % days.length === 0) slotIndex++;
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: `Schedule generated successfully (${generated.length} entries)`,
-      entries: generated,
+      message:
+        generatedCount > 0
+          ? `✅ Schedule generated successfully (${generatedCount} entries, balanced across weekdays).`
+          : "No new schedules added — all already scheduled.",
     });
   } catch (error) {
     console.error("Error generating schedule:", error);
     return NextResponse.json(
-      { error: "Failed to generate schedule" },
+      { success: false, error: "Failed to generate schedule" },
+      { status: 500 }
+    );
+  }
+}
+
+// ✅ DELETE endpoint (works correctly)
+export async function DELETE() {
+  try {
+    await connectDB();
+    const count = await ScheduleEntry.countDocuments();
+
+    if (count === 0) {
+      return NextResponse.json({
+        success: false,
+        message: "No existing schedule to delete.",
+      });
+    }
+
+    await ScheduleEntry.deleteMany({});
+
+    return NextResponse.json({
+      success: true,
+      message: `🗑️ Deleted ${count} schedule entries successfully.`,
+    });
+  } catch (error) {
+    console.error("Error deleting schedule:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to delete schedule" },
       { status: 500 }
     );
   }
