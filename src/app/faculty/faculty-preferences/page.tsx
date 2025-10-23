@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
@@ -37,7 +37,6 @@ export default function FacultyPreferencesPage() {
 
   const fetchInitialData = async () => {
     try {
-      // Fetch both courses and submitted prefs
       const [coursesRes, prefsRes] = await Promise.all([
         fetch("/api/courses"),
         fetch("/api/faculty/preferences"),
@@ -46,7 +45,6 @@ export default function FacultyPreferencesPage() {
       const prefsData = await prefsRes.json();
 
       setCourses(coursesData.courses || []);
-
       if (prefsData.submitted) {
         setSubmitted(true);
         setSubmittedPrefs(prefsData.preference.courses || []);
@@ -64,9 +62,18 @@ export default function FacultyPreferencesPage() {
     setPreferences(updated);
   };
 
+  // 🧠 Dynamically calculate which courses are already selected
+  const selectedCourseIds = useMemo(
+    () => preferences.filter(Boolean),
+    [preferences]
+  );
+
+  const availableCourses = useMemo(() => {
+    return courses.filter((course) => !selectedCourseIds.includes(course._id));
+  }, [courses, selectedCourseIds]);
+
   const handleSubmit = async () => {
     const parsed = facultyPreferenceSchema.safeParse({ preferences });
-
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
@@ -105,6 +112,7 @@ export default function FacultyPreferencesPage() {
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
               alt="VU Logo"
               className="w-8 h-auto"
+              style={{ height: "auto" }}
             />
           </div>
           <span className="text-lg font-semibold">
@@ -145,29 +153,37 @@ export default function FacultyPreferencesPage() {
           ) : (
             <>
               <p className="text-sm text-gray-600 mb-4">
-                Select at least 5 course preferences from the available list.
+                Select <b>5 course preferences</b> from the available list.
               </p>
 
               <div className="space-y-4">
-                {preferences.map((pref, index) => (
-                  <div key={index} className="flex flex-col">
-                    <label className="text-sm text-gray-700 font-medium mb-1">
-                      Preference #{index + 1}
-                    </label>
-                    <select
-                      value={pref}
-                      onChange={(e) => handleChange(index, e.target.value)}
-                      className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d89860]"
-                    >
-                      <option value="">Select a course</option>
-                      {courses.map((course) => (
-                        <option key={course._id} value={course._id}>
-                          {course.code} - {course.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
+                {preferences.map((pref, index) => {
+                  // dynamically show available + selected value
+                  const selectableCourses = [
+                    ...availableCourses,
+                    ...courses.filter((c) => c._id === pref),
+                  ];
+
+                  return (
+                    <div key={index} className="flex flex-col">
+                      <label className="text-sm text-gray-700 font-medium mb-1">
+                        Preference #{index + 1}
+                      </label>
+                      <select
+                        value={pref}
+                        onChange={(e) => handleChange(index, e.target.value)}
+                        className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d89860] transition"
+                      >
+                        <option value="">Select a course</option>
+                        {selectableCourses.map((course) => (
+                          <option key={course._id} value={course._id}>
+                            {course.code} - {course.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                })}
               </div>
 
               <button
