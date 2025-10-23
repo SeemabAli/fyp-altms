@@ -95,11 +95,21 @@ export async function DELETE(req: Request) {
       console.log(`Deleted all FacultyPreferences for ${user.name}`);
     }
 
+    // ✅ If student, delete all their enrollments (with proper model + connection)
+    if (user.role === "student") {
+      const { default: Enrollment } = await import("@/models/Enrollment");
+      await connectDB(); // ensure active connection for dynamic import
+      const deleted = await Enrollment.deleteMany({ studentId: user._id });
+      console.log(
+        `Deleted ${deleted.deletedCount} enrollments for ${user.name}`
+      );
+    }
+
     await User.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
-      message: "User and related preferences deleted successfully",
+      message: "User and related data deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting user:", error);
