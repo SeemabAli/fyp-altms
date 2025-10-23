@@ -107,7 +107,7 @@ export default function EnrollmentPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/coordinator/enrollment/${id}`, {
+      const res = await fetch(`/api/coordinators/enrollment/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -236,18 +236,18 @@ export default function EnrollmentPage() {
                     >
                       <td className="px-4 py-3">{idx + 1}</td>
                       <td className="px-4 py-3 font-medium">
-                        {e.studentId.name}
+                        {e.studentId?.name}
                       </td>
                       <td className="px-4 py-3">
                         <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold">
-                          {e.studentId.batch}
+                          {e.studentId?.batch}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-gray-600">
-                        {e.studentId.email}
+                        {e.studentId?.email}
                       </td>
                       <td className="px-4 py-3 font-semibold text-[#d89860]">
-                        {e.courseId.code}
+                        {e.courseId?.code}
                       </td>
                       <td className="px-4 py-3">{e.courseId.title}</td>
                       <td className="px-4 py-3 text-center">
