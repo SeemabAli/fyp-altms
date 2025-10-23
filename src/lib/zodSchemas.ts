@@ -33,14 +33,12 @@ export const signInSchema = z.object({
 });
 
 export const courseSchema = z.object({
-  code: z
-    .string()
-    .min(2, "Course code is required")
-    .transform((s) => s.toUpperCase()),
-  title: z.string().min(3, "Course title is required"),
-  enrollment: z.number().min(0, "Enrollment must be >= 0"),
+  code: z.string().min(2),
+  title: z.string().min(2),
+  creditHours: z.number().min(1).max(4),
+  enrollment: z.number().min(1),
   multimediaRequired: z.boolean(),
-  studentBatch: z.string().optional().nullable(),
+  studentBatch: z.string().min(2),
 });
 
 export const classroomSchema = z.object({

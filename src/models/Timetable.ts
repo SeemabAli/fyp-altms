@@ -1,26 +1,20 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 interface ITimetable extends Document {
-  facultyId: string;
-  courseCode: string;
-  courseTitle: string;
-  room: string;
+  faculty: mongoose.Types.ObjectId;
+  course: mongoose.Types.ObjectId;
+  classroom: mongoose.Types.ObjectId;
   day: string;
-  startTime: string;
-  endTime: string;
-  batch?: string;
+  slot: string;
 }
 
 const TimetableSchema = new Schema<ITimetable>(
   {
-    facultyId: { type: String, required: true },
-    courseCode: { type: String, required: true },
-    courseTitle: { type: String, required: true },
-    room: { type: String, required: true },
+    faculty: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    course: { type: Schema.Types.ObjectId, ref: "Course", required: true },
+    classroom: { type: Schema.Types.ObjectId, ref: "Classroom", required: true },
     day: { type: String, required: true },
-    startTime: { type: String, required: true },
-    endTime: { type: String, required: true },
-    batch: { type: String },
+    slot: { type: String, required: true },
   },
   { timestamps: true }
 );
