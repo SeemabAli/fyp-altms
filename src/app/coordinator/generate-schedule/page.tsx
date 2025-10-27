@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import { Loader2, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 export default function GenerateSchedulePage() {
   const [loading, setLoading] = useState(false);
@@ -75,6 +76,13 @@ export default function GenerateSchedulePage() {
                 "Generate Schedule"
               )}
             </button>
+
+            <Link
+              href="/coordinator/view-schedule"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center justify-center"
+            >
+              View Schedule
+            </Link>
 
             <button
               onClick={handleDelete}
