@@ -10,7 +10,6 @@ import {
   BookOpen,
   ClipboardList,
   Zap,
-  Eye,
   BookX,
   CalendarX,
   PenTool,
@@ -57,15 +56,9 @@ export default function CoordinatorDashboard() {
     },
     {
       href: "/coordinator/generate-schedule",
-      title: "Generate Schedule",
+      title: "Generate/View Schedule",
       desc: "Automatically generate timetable from preferences.",
       icon: Zap,
-    },
-    {
-      href: "/coordinator/view-schedule",
-      title: "View Full Schedule",
-      desc: "See all scheduled lectures by faculty, course, or room.",
-      icon: Eye,
     },
     {
       href: "/coordinator/enrollment",
@@ -146,17 +139,48 @@ export default function CoordinatorDashboard() {
         </div>
 
         {/* GRID CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className="
+    grid 
+    grid-cols-1 
+    sm:grid-cols-2 
+    lg:grid-cols-3 
+    gap-6 
+    auto-rows-[1fr]
+  "
+        >
           {links.map((item) => {
             const Icon = item.icon;
             return (
               <Link key={item.href} href={item.href}>
-                <div className="bg-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col items-center justify-center text-center border-t-4 border-[#d89860] cursor-pointer">
-                  <Icon className="text-[#d89860] w-10 h-10 mb-3" />
-                  <h2 className="font-semibold text-[#493737] text-lg mb-1">
-                    {item.title}
-                  </h2>
-                  <p className="text-gray-600 text-sm">{item.desc}</p>
+                <div
+                  className="
+            bg-white 
+            rounded-xl 
+            shadow-md 
+            hover:shadow-lg 
+            hover:-translate-y-1 
+            transition-all 
+            duration-300 
+            p-6 
+            flex 
+            flex-col 
+            items-center 
+            justify-between 
+            text-center 
+            border-t-4 
+            border-[#d89860] 
+            cursor-pointer 
+            h-full
+          "
+                >
+                  <div className="flex flex-col items-center">
+                    <Icon className="text-[#d89860] w-10 h-10 mb-3" />
+                    <h2 className="font-semibold text-[#493737] text-lg mb-1">
+                      {item.title}
+                    </h2>
+                    <p className="text-gray-600 text-sm">{item.desc}</p>
+                  </div>
                 </div>
               </Link>
             );
