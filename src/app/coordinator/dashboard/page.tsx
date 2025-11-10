@@ -11,7 +11,6 @@ import {
   ClipboardList,
   Zap,
   BookX,
-  CalendarX,
   PenTool,
   User,
   UserPlus,
@@ -71,12 +70,6 @@ export default function CoordinatorDashboard() {
       title: "Unscheduled Summary",
       desc: "Summary that were not assigned to any slot or faculty.",
       icon: BookX,
-    },
-    {
-      href: "/coordinator/timeslot",
-      title: "Manage Timeslots",
-      desc: "View rooms and slots still available after scheduling.",
-      icon: CalendarX,
     },
     {
       href: "/coordinator/manual-scheduling",

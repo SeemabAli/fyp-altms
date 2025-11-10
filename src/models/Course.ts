@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import { Schema, Document, Model, models, model } from "mongoose";
 
 export interface ICourse extends Document {
   code: string;
@@ -23,9 +23,9 @@ const CourseSchema = new Schema<ICourse>(
   { timestamps: true }
 );
 
-CourseSchema.index({ code: 1 }, { unique: true });
-
-const Course: Model<ICourse> =
-  mongoose.models.Course || mongoose.model<ICourse>("Course", CourseSchema);
+// ✅ Safe re-use for hot reloads
+const Course =
+  (models?.Course as Model<ICourse>) ||
+  model<ICourse>("Course", CourseSchema);
 
 export default Course;

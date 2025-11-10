@@ -80,7 +80,7 @@ export async function POST() {
       success: true,
       message:
         generatedCount > 0
-          ? `✅ Schedule generated successfully (${generatedCount} entries, balanced across weekdays).`
+          ? `Schedule generated successfully (${generatedCount} entries, balanced across weekdays).`
           : "No new schedules added — all already scheduled.",
     });
   } catch (error) {
@@ -109,7 +109,7 @@ export async function DELETE() {
 
     return NextResponse.json({
       success: true,
-      message: `🗑️ Deleted ${count} schedule entries successfully.`,
+      message: `Deleted ${count} schedule entries successfully.`,
     });
   } catch (error) {
     console.error("Error deleting schedule:", error);

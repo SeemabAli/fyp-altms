@@ -36,10 +36,7 @@ export default function FacultyProfilePage() {
 
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
-      <div
-        className="bg-[
-#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md"
-      >
+      <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
@@ -48,14 +45,12 @@ export default function FacultyProfilePage() {
               className="w-8 h-auto"
             />
           </div>
-          <span className="text-lg font-semibold">
+          <span className="text-lg font-semibold tracking-wide">
             Automated Timetable System
           </span>
         </div>
-        <button className="px-4 py-2 rounded text-sm">
-          <LogoutButton />
-        </button>
-      </div>
+        <LogoutButton />
+      </header>
 
       {/* MAIN CONTAINER */}
       <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">

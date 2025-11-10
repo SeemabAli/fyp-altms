@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -5,11 +7,12 @@ import LogoutButton from "@/components/LogoutButton";
 import { Loader2, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import ScheduleDeleteModal from "./ScheduleDelete";
 
 export default function GenerateSchedulePage() {
   const [loading, setLoading] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
   const handleGenerate = async () => {
     setLoading(true);
     try {
@@ -24,31 +27,24 @@ export default function GenerateSchedulePage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete all generated schedules?"))
-      return;
-    setDeleting(true);
-    try {
-      const res = await fetch("/api/coordinators/generate", {
-        method: "DELETE",
-      });
-      const data = await res.json();
-      if (data.success) toast.success(data.message);
-      else toast.error(data.message || "Failed to delete");
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
       {/* HEADER */}
-      <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center">
-        <span className="text-lg font-semibold">Generate Schedule</span>
+      <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
+        <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
+              alt="VU Logo"
+              className="w-8 h-auto"
+            />
+          </div>
+          <span className="text-lg font-semibold tracking-wide">
+            Automated Timetable System
+          </span>
+        </div>
         <LogoutButton />
-      </div>
+      </header>
 
       {/* MAIN */}
       <div className="max-w-4xl mx-auto p-6">
@@ -84,21 +80,22 @@ export default function GenerateSchedulePage() {
               View Schedule
             </Link>
 
+            {/* Delete Schedule Button */}
             <button
-              onClick={handleDelete}
+              onClick={() => setOpenDelete(true)}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center justify-center"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center justify-center transition"
             >
-              {deleting ? (
-                <>
-                  <Loader2 className="animate-spin mr-2 h-5 w-5" /> Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-5 w-5" /> Delete Schedule
-                </>
-              )}
+              <Trash2 className="mr-2 h-5 w-5" />
+              Delete Schedule
             </button>
+
+            {/* Delete Confirmation Modal */}
+            <ScheduleDeleteModal
+              open={openDelete}
+              setOpen={setOpenDelete}
+              refresh={() => window.location.reload()}
+            />
           </div>
         </div>
       </div>

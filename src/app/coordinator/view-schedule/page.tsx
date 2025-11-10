@@ -10,8 +10,17 @@ interface Entry {
   facultyId: { name: string; designation: string };
   roomId: { name: string };
   day: string;
-  slot: string;
+  slot: string | { start: string; end: string; slotIndex: number };
 }
+
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const SLOTS = [
+  { display: "08:00am – 09:30am", start: "08:00", end: "09:30", index: 0 },
+  { display: "09:30am – 11:00am", start: "09:30", end: "11:00", index: 1 },
+  { display: "11:00am – 12:30pm", start: "11:00", end: "12:30", index: 2 },
+  { display: "01:30pm – 03:00pm", start: "13:30", end: "15:00", index: 3 },
+  { display: "03:00pm – 04:30pm", start: "15:00", end: "16:30", index: 4 },
+];
 
 export default function ViewSchedulePage() {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -20,7 +29,7 @@ export default function ViewSchedulePage() {
 
   const fetchSchedule = async () => {
     try {
-      const res = await fetch("/api/coordinators/view", { cache: "no-store" }); // ✅ always get latest
+      const res = await fetch("/api/coordinators/view", { cache: "no-store" });
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -42,6 +51,28 @@ export default function ViewSchedulePage() {
     fetchSchedule();
   }, []);
 
+  // Group entries by day and slot
+  const getEntryForDayAndSlot = (day: string, start: string, end: string) => {
+    return entries.find((e) => {
+      if (e.day !== day) return false;
+      
+      // If slot is an object (populated from Timeslot)
+      if (typeof e.slot === 'object' && e.slot !== null) {
+        return e.slot.start === start && e.slot.end === end;
+      }
+      
+      // If slot is a string, normalize and compare
+      if (typeof e.slot === 'string') {
+        // Remove all spaces and convert to lowercase for comparison
+        const normalizedSlot = e.slot.replace(/\s+/g, '').toLowerCase();
+        const normalizedSearch = `${start}-${end}`.replace(/\s+/g, '').toLowerCase();
+        return normalizedSlot === normalizedSearch;
+      }
+      
+      return false;
+    });
+  };
+
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
       {/* Header */}
@@ -51,15 +82,18 @@ export default function ViewSchedulePage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-sm border-l-4 border-[#d89860] p-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-[#493737]">
-              Generated Schedule
+              Generated Schedule{" "}
+              <span className="text-base text-gray-500 font-normal">
+                ({entries.length} entries)
+              </span>
             </h1>
             <button
               onClick={fetchSchedule}
-              className="bg-[#d89860] text-white px-4 py-2 rounded-md hover:bg-[#c98750] transition"
+              className="bg-[#d89860] text-white px-6 py-2 rounded-md hover:bg-[#c98750] transition font-medium"
             >
               Refresh
             </button>
@@ -74,35 +108,59 @@ export default function ViewSchedulePage() {
               No schedule generated yet.
             </p>
           ) : (
-            <table className="w-full border-collapse">
-              <thead className="bg-[#493737] text-white text-sm">
-                <tr>
-                  <th className="px-4 py-3 text-left">Course</th>
-                  <th className="px-4 py-3 text-left">Faculty</th>
-                  <th className="px-4 py-3 text-left">Room</th>
-                  <th className="px-4 py-3 text-left">Day</th>
-                  <th className="px-4 py-3 text-left">Slot</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entries.map((entry) => (
-                  <tr
-                    key={entry._id}
-                    className="border-b hover:bg-gray-50 transition"
-                  >
-                    <td className="px-4 py-3">
-                      {entry.courseId.code} - {entry.courseId.title}
-                    </td>
-                    <td className="px-4 py-3">
-                      {entry.facultyId?.name} ({entry.facultyId?.designation})
-                    </td>
-                    <td className="px-4 py-3">{entry.roomId?.name}</td>
-                    <td className="px-4 py-3">{entry.day}</td>
-                    <td className="px-4 py-3">{entry.slot}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-[#493737] text-white">
+                    <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
+                      Weekday
+                    </th>
+                    {SLOTS.map((slot) => (
+                      <th
+                        key={slot.display}
+                        className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm"
+                      >
+                        {slot.display}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {DAYS.map((day) => (
+                    <tr key={day} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-4 py-6 font-semibold text-[#493737] bg-gray-50">
+                        {day}
+                      </td>
+                      {SLOTS.map((slot) => {
+                            const entry = getEntryForDayAndSlot(day, slot.start, slot.end);
+                            return (
+                              <td
+                                key={slot.display}
+                                className="border border-gray-300 px-3 py-4 text-center align-middle"
+                              >
+                            {entry ? (
+                              <div className="bg-[#d89860] text-white rounded-lg p-3 min-h-[80px] flex flex-col justify-center">
+                                <div className="font-semibold text-sm mb-1">
+                                  {entry.courseId.code} ({entry.courseId.title})
+                                </div>
+                                <div className="text-xs">
+                                  {entry.facultyId?.name} – {entry.facultyId?.designation}
+                                </div>
+                                <div className="text-xs mt-1">
+                                  Room: {entry.roomId?.name}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-2xl">—</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
