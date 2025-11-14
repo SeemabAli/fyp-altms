@@ -23,7 +23,13 @@ export async function POST() {
     }
 
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-    const slots = ["08:00-09:30", "10:00-11:30", "12:00-13:30"];
+    const slots = [
+      "08:00-09:30",
+      "09:30-11:00",
+      "11:00-12:30",
+      "13:30-15:00",
+      "15:00-16:30",
+    ];
     let dayIndex = 0;
     let slotIndex = 0;
     let generatedCount = 0;
