@@ -59,7 +59,6 @@ export default function EnrollmentPage() {
           _id: u._id,
           name: u.name,
           email: u.email,
-          batch: u.batch || "N/A",
         }));
 
       setStudents(studentList);
@@ -156,7 +155,13 @@ export default function EnrollmentPage() {
                   </option>
                   {students.map((s) => (
                     <option key={s._id} value={s._id}>
-                      {s.name} ({s.batch})
+                      {s.name
+                        .split(" ")
+                        .map(
+                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ")}{" "}
+                      - {s.email}
                     </option>
                   ))}
                 </select>
@@ -208,7 +213,6 @@ export default function EnrollmentPage() {
                 <tr>
                   <th className="px-4 py-3 text-left">#</th>
                   <th className="px-4 py-3 text-left">Student Name</th>
-                  <th className="px-4 py-3 text-left">Batch</th>
                   <th className="px-4 py-3 text-left">Email</th>
                   <th className="px-4 py-3 text-left">Course Code</th>
                   <th className="px-4 py-3 text-left">Course Title</th>
@@ -237,11 +241,6 @@ export default function EnrollmentPage() {
                       <td className="px-4 py-3">{idx + 1}</td>
                       <td className="px-4 py-3 font-medium">
                         {e.studentId?.name}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold">
-                          {e.studentId?.batch}
-                        </span>
                       </td>
                       <td className="px-4 py-3 text-gray-600">
                         {e.studentId?.email}
