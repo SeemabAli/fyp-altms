@@ -51,26 +51,35 @@ export default function ViewSchedulePage() {
     fetchSchedule();
   }, []);
 
-  // Group entries by day and slot
-  const getEntryForDayAndSlot = (day: string, start: string, end: string) => {
-    return entries.find((e) => {
+  // Get ALL entries for day and slot (not just one)
+  const getEntriesForDayAndSlot = (day: string, start: string, end: string) => {
+    return entries.filter((e) => {
       if (e.day !== day) return false;
-      
+
       // If slot is an object (populated from Timeslot)
-      if (typeof e.slot === 'object' && e.slot !== null) {
+      if (typeof e.slot === "object" && e.slot !== null) {
         return e.slot.start === start && e.slot.end === end;
       }
-      
+
       // If slot is a string, normalize and compare
-      if (typeof e.slot === 'string') {
+      if (typeof e.slot === "string") {
         // Remove all spaces and convert to lowercase for comparison
-        const normalizedSlot = e.slot.replace(/\s+/g, '').toLowerCase();
-        const normalizedSearch = `${start}-${end}`.replace(/\s+/g, '').toLowerCase();
+        const normalizedSlot = e.slot.replace(/\s+/g, "").toLowerCase();
+        const normalizedSearch = `${start}-${end}`
+          .replace(/\s+/g, "")
+          .toLowerCase();
         return normalizedSlot === normalizedSearch;
       }
-      
+
       return false;
     });
+  };
+
+  // ✅ Function to get background color based on index
+  const getCardColor = (index: number) => {
+    if (index === 0) return "bg-[#d89860]"; // Original color for 1st entry
+    if (index === 1) return "bg-[#6b8e9f]"; // Blue-grey for 2nd entry
+    return "bg-[#8b7ba8]"; // Purple for 3rd+ entry
   };
 
   return (
@@ -132,23 +141,38 @@ export default function ViewSchedulePage() {
                         {day}
                       </td>
                       {SLOTS.map((slot) => {
-                            const entry = getEntryForDayAndSlot(day, slot.start, slot.end);
-                            return (
-                              <td
-                                key={slot.display}
-                                className="border border-gray-300 px-3 py-4 text-center align-middle"
-                              >
-                            {entry ? (
-                              <div className="bg-[#d89860] text-white rounded-lg p-3 min-h-[80px] flex flex-col justify-center">
-                                <div className="font-semibold text-sm mb-1">
-                                  {entry.courseId.code} ({entry.courseId.title})
-                                </div>
-                                <div className="text-xs">
-                                  {entry.facultyId?.name} – {entry.facultyId?.designation}
-                                </div>
-                                <div className="text-xs mt-1">
-                                  Room: {entry.roomId?.name}
-                                </div>
+                        const matchingEntries = getEntriesForDayAndSlot(
+                          day,
+                          slot.start,
+                          slot.end
+                        );
+                        return (
+                          <td
+                            key={slot.display}
+                            className="border border-gray-300 px-3 py-4 text-center align-middle"
+                          >
+                            {matchingEntries.length > 0 ? (
+                              <div className="space-y-2">
+                                {matchingEntries.map((entry, index) => (
+                                  <div
+                                    key={entry._id}
+                                    className={`${getCardColor(
+                                      index
+                                    )} text-white rounded-lg p-3 min-h-[80px] flex flex-col justify-center`}
+                                  >
+                                    <div className="font-semibold text-sm mb-1">
+                                      {entry.courseId.code} (
+                                      {entry.courseId.title})
+                                    </div>
+                                    <div className="text-xs">
+                                      {entry.facultyId?.name} –{" "}
+                                      {entry.facultyId?.designation}
+                                    </div>
+                                    <div className="text-xs mt-1">
+                                      Room: {entry.roomId?.name}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             ) : (
                               <span className="text-gray-400 text-2xl">—</span>
