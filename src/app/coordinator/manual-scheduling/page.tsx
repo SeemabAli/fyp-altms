@@ -41,13 +41,13 @@ export default function ManualSchedulingPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  // ✅ Updated: Match generation slots (5 slots per day, 08:00-16:30)
   const slots = [
     "08:00-09:30",
     "09:30-11:00",
     "11:00-12:30",
-    "12:30-14:00",
-    "14:00-15:30",
-    "15:30-17:00",
+    "13:30-15:00",
+    "15:00-16:30",
   ];
 
   // Fetch data on mount
@@ -61,16 +61,15 @@ export default function ManualSchedulingPage() {
   }, []);
 
   const fetchUnscheduled = async () => {
-  try {
-    const res = await fetch("/api/coordinators/unscheduled");
-    const data = await res.json();
-    if (res.ok) setCourses(data.unscheduledCourses || []);
-    else toast.error(data.error || "Failed to fetch unscheduled courses");
-  } catch {
-    toast.error("Failed to fetch unscheduled courses");
-  }
-};
-
+    try {
+      const res = await fetch("/api/coordinators/unscheduled");
+      const data = await res.json();
+      if (res.ok) setCourses(data.unscheduledCourses || []);
+      else toast.error(data.error || "Failed to fetch unscheduled courses");
+    } catch {
+      toast.error("Failed to fetch unscheduled courses");
+    }
+  };
 
   const fetchFaculties = async () => {
     try {
