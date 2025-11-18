@@ -5,7 +5,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
-import { CalendarDays, ClipboardList, User } from "lucide-react";
+import {
+  CalendarDays,
+  ClipboardList,
+  Mail,
+  ShieldCheck,
+  User,
+} from "lucide-react";
+import { useState } from "react";
 
 type FacultyUser = {
   id: string;
@@ -22,11 +29,15 @@ type FacultySession = {
 
 export default function FacultyDashboard() {
   const { data: session } = useSession() as { data: FacultySession | null };
+  const [open, setOpen] = useState(false);
+
+  const toggleDropdown = () => setOpen(!open);
 
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
       {/* HEADER */}
-      <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
+      <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md relative">
+        {/* Left Section */}
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
@@ -39,7 +50,42 @@ export default function FacultyDashboard() {
             Automated Timetable System
           </span>
         </div>
-        <LogoutButton />
+
+        {/* Right Section */}
+        <div className="flex items-center gap-4 relative">
+          {/* USER ICON (Dropdown Trigger) */}
+          <button
+            onClick={toggleDropdown}
+            className="text-white hover:text-gray-300 focus:outline-none"
+          >
+            <User className="w-6 h-6" />
+          </button>
+
+          {/* DROPDOWN - WITHOUT LOGOUT BUTTON */}
+          {open && (
+            <div className="absolute right-16 top-12 w-60 bg-white text-black rounded-xl shadow-lg p-4 border border-gray-200 z-50">
+              <h3 className="font-semibold text-lg text-[#493737]">
+                {session?.user?.name}
+              </h3>
+              <div className="mt-2 text-sm text-gray-700">
+                <p className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> {session?.user?.email}
+                </p>
+                <p className="flex items-center gap-2 mt-1 capitalize">
+                  <ShieldCheck className="w-4 h-4" /> {session?.user?.role}
+                </p>
+                {session?.user?.designation && (
+                  <p className="flex items-center gap-2 mt-1">
+                    <User className="w-4 h-4" /> {session.user.designation}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* LOGOUT BUTTON - OUTSIDE DROPDOWN */}
+          <LogoutButton />
+        </div>
       </header>
 
       {/* MAIN CONTAINER */}
@@ -70,7 +116,7 @@ export default function FacultyDashboard() {
         </div>
 
         {/* GRID CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {/* 1️⃣ Course Preferences */}
           <Link href="/faculty/faculty-preferences">
             <div className="bg-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col items-center justify-center text-center border-t-4 border-[#d89860] cursor-pointer">
@@ -93,19 +139,6 @@ export default function FacultyDashboard() {
               </h2>
               <p className="text-gray-600 text-sm">
                 View your finalized lecture schedule once generated.
-              </p>
-            </div>
-          </Link>
-
-          {/* 3️⃣ Profile */}
-          <Link href="/faculty/profile">
-            <div className="bg-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col items-center justify-center text-center border-t-4 border-[#d89860] cursor-pointer">
-              <User className="text-[#d89860] w-10 h-10 mb-3" />
-              <h2 className="font-semibold text-[#493737] text-lg mb-1">
-                My Profile
-              </h2>
-              <p className="text-gray-600 text-sm">
-                View your personal information and assigned courses.
               </p>
             </div>
           </Link>

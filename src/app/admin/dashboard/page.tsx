@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Edit, Trash2, UserPlus } from "lucide-react";
+import { Edit, Mail, ShieldCheck, Trash2, User, UserPlus } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import toast from "react-hot-toast";
@@ -22,7 +22,8 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any>(null);
-  const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   // Fetch all users
@@ -45,7 +46,8 @@ export default function AdminDashboard() {
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
       {/* HEADER */}
-      <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
+      <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md relative">
+        {/* Left Section */}
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
@@ -54,12 +56,44 @@ export default function AdminDashboard() {
               className="w-8 h-auto"
             />
           </div>
-          <span className="text-lg font-semibold">
+          <span className="text-lg font-semibold tracking-wide">
             Automated Timetable System
           </span>
         </div>
-        <LogoutButton />
-      </div>
+
+        {/* Right Section */}
+        <div className="flex items-center gap-4 relative">
+          {/* USER ICON (Dropdown Trigger) */}
+          <button
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="text-white hover:text-gray-300 focus:outline-none"
+          >
+            <User className="w-6 h-6" />
+          </button>
+
+          {/* DROPDOWN (Profile) */}
+          {profileOpen && (
+            <div className="absolute right-16 top-12 w-60 bg-white text-black rounded-xl shadow-lg p-4 border border-gray-200 z-50">
+              <h3 className="font-semibold text-lg text-[#493737]">
+                {users[0]?.name || "Admin"}
+              </h3>
+
+              <div className="mt-2 text-sm text-gray-700">
+                <p className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> {users[0]?.email}
+                </p>
+
+                <p className="flex items-center gap-2 mt-1 capitalize">
+                  <ShieldCheck className="w-4 h-4" /> admin
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* LOGOUT BUTTON OUTSIDE */}
+          <LogoutButton />
+        </div>
+      </header>
 
       {/* MAIN */}
       <div className="max-w-6xl mx-auto p-6">
@@ -75,7 +109,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => {
               setSelected(null);
-              setOpen(true);
+              setModalOpen(true);
             }}
             className="flex items-center gap-2 bg-[#d89860] hover:bg-[#c08850] text-white px-4 py-2 rounded-lg"
           >
@@ -131,7 +165,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => {
                             setSelected(user);
-                            setOpen(true);
+                            setModalOpen(true);
                           }}
                           className="text-[#d89860] hover:text-[#c08850]"
                         >
@@ -158,11 +192,12 @@ export default function AdminDashboard() {
 
       {/* MODALS */}
       <UserModal
-        open={open}
-        setOpen={setOpen}
+        open={modalOpen}
+        setOpen={setModalOpen}
         selected={selected}
         refresh={fetchUsers}
       />
+
       <UserDeleteModal
         open={deleteOpen}
         setOpen={setDeleteOpen}
