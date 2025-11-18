@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Edit, Mail, ShieldCheck, Trash2, User, UserPlus } from "lucide-react";
+import { Edit, Trash2, User, UserPlus } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import toast from "react-hot-toast";
@@ -22,7 +22,6 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any>(null);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -63,33 +62,6 @@ export default function AdminDashboard() {
 
         {/* Right Section */}
         <div className="flex items-center gap-4 relative">
-          {/* USER ICON (Dropdown Trigger) */}
-          <button
-            onClick={() => setProfileOpen(!profileOpen)}
-            className="text-white hover:text-gray-300 focus:outline-none"
-          >
-            <User className="w-6 h-6" />
-          </button>
-
-          {/* DROPDOWN (Profile) */}
-          {profileOpen && (
-            <div className="absolute right-16 top-12 w-60 bg-white text-black rounded-xl shadow-lg p-4 border border-gray-200 z-50">
-              <h3 className="font-semibold text-lg text-[#493737]">
-                {users[0]?.name || "Admin"}
-              </h3>
-
-              <div className="mt-2 text-sm text-gray-700">
-                <p className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" /> {users[0]?.email}
-                </p>
-
-                <p className="flex items-center gap-2 mt-1 capitalize">
-                  <ShieldCheck className="w-4 h-4" /> admin
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* LOGOUT BUTTON OUTSIDE */}
           <LogoutButton />
         </div>
