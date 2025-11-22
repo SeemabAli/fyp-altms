@@ -6,6 +6,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import { Clock } from "lucide-react";
 import toast from "react-hot-toast";
+import DeletePreferenceModal from "./DeletePreferenceModal";
 
 interface FacultyPreference {
   _id: string;
@@ -21,6 +22,9 @@ interface FacultyPreference {
 export default function CoordinatorPreferencesPage() {
   const [preferences, setPreferences] = useState<FacultyPreference[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedPreference, setSelectedPreference] =
+    useState<FacultyPreference | null>(null);
 
   const fetchPreferences = async () => {
     try {
@@ -41,25 +45,10 @@ export default function CoordinatorPreferencesPage() {
   useEffect(() => {
     fetchPreferences();
   }, []);
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this preference?")) return;
 
-    try {
-      const res = await fetch(`/api/coordinators/preferences/${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success("Preference deleted successfully");
-        setPreferences((prev) => prev.filter((p) => p._id !== id));
-      } else {
-        toast.error(data.error || "Failed to delete");
-      }
-    } catch {
-      toast.error("Error deleting preference");
-    }
+  const handleDeleteClick = (pref: FacultyPreference) => {
+    setSelectedPreference(pref);
+    setDeleteModalOpen(true);
   };
 
   return (
@@ -171,7 +160,7 @@ export default function CoordinatorPreferencesPage() {
                       </td>
                       <td className="px-4 py-4 text-center">
                         <button
-                          onClick={() => handleDelete(pref._id)}
+                          onClick={() => handleDeleteClick(pref)}
                           className="px-3 py-1 text-xs bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
                         >
                           Delete
@@ -185,6 +174,14 @@ export default function CoordinatorPreferencesPage() {
           </div>
         </div>
       </div>
+
+      {/* DELETE MODAL */}
+      <DeletePreferenceModal
+        open={deleteModalOpen}
+        setOpen={setDeleteModalOpen}
+        selected={selectedPreference}
+        refresh={fetchPreferences}
+      />
     </ProtectedRoute>
   );
 }
