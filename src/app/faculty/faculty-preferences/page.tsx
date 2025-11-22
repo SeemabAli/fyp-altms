@@ -2,13 +2,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-import { facultyPreferenceSchema } from "@/lib/zodSchemas";
 
 interface Course {
   _id: string;
@@ -19,13 +18,7 @@ interface Course {
 export default function FacultyPreferencesPage() {
   const { data: session } = useSession();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [preferences, setPreferences] = useState<string[]>([
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [submittedPrefs, setSubmittedPrefs] = useState<Course[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -56,26 +49,17 @@ export default function FacultyPreferencesPage() {
     }
   };
 
-  const handleChange = (index: number, value: string) => {
-    const updated = [...preferences];
-    updated[index] = value;
-    setPreferences(updated);
+  const handleCourseToggle = (courseId: string) => {
+    setSelectedCourses((prev) =>
+      prev.includes(courseId)
+        ? prev.filter((id) => id !== courseId)
+        : [...prev, courseId]
+    );
   };
 
-  // 🧠 Dynamically calculate which courses are already selected
-  const selectedCourseIds = useMemo(
-    () => preferences.filter(Boolean),
-    [preferences]
-  );
-
-  const availableCourses = useMemo(() => {
-    return courses.filter((course) => !selectedCourseIds.includes(course._id));
-  }, [courses, selectedCourseIds]);
-
   const handleSubmit = async () => {
-    const parsed = facultyPreferenceSchema.safeParse({ preferences });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
+    if (selectedCourses.length < 5) {
+      toast.error("Please select at least 5 courses");
       return;
     }
 
@@ -84,7 +68,7 @@ export default function FacultyPreferencesPage() {
       const res = await fetch("/api/faculty/preferences", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ preferences }),
+        body: JSON.stringify({ preferences: selectedCourses }),
       });
 
       const data = await res.json();
@@ -153,43 +137,49 @@ export default function FacultyPreferencesPage() {
           ) : (
             <>
               <p className="text-sm text-gray-600 mb-4">
-                Select <b>5 course preferences</b> from the available list.
+                Select <b>at least 5 courses</b> from the available list. You
+                can select more than 5.
               </p>
 
-              <div className="space-y-4">
-                {preferences.map((pref, index) => {
-                  // dynamically show available + selected value
-                  const selectableCourses = [
-                    ...availableCourses,
-                    ...courses.filter((c) => c._id === pref),
-                  ];
+              <div className="mb-4 text-sm font-medium text-[#493737]">
+                Selected: {selectedCourses.length} course(s)
+                {selectedCourses.length < 5 && (
+                  <span className="text-red-600 ml-2">
+                    (Minimum 5 required)
+                  </span>
+                )}
+              </div>
 
+              <div className="space-y-2 max-h-96 overflow-y-auto border rounded-lg p-3 bg-gray-50">
+                {courses.map((course) => {
+                  const isSelected = selectedCourses.includes(course._id);
                   return (
-                    <div key={index} className="flex flex-col">
-                      <label className="text-sm text-gray-700 font-medium mb-1">
-                        Preference #{index + 1}
-                      </label>
-                      <select
-                        value={pref}
-                        onChange={(e) => handleChange(index, e.target.value)}
-                        className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d89860] transition"
-                      >
-                        <option value="">Select a course</option>
-                        {selectableCourses.map((course) => (
-                          <option key={course._id} value={course._id}>
-                            {course.code} - {course.title}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <label
+                      key={course._id}
+                      className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${
+                        isSelected
+                          ? "bg-[#d89860] bg-opacity-10 border-[#d89860]"
+                          : "bg-white border-gray-200 hover:border-[#d89860]"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleCourseToggle(course._id)}
+                        className="w-4 h-4 text-[#d89860] border-gray-300 rounded focus:ring-[#d89860] mr-3"
+                      />
+                      <span className="font-medium text-[#493737]">
+                        {course.code} - {course.title}
+                      </span>
+                    </label>
                   );
                 })}
               </div>
 
               <button
                 onClick={handleSubmit}
-                disabled={submitting}
-                className="mt-6 w-full py-2 bg-[#d89860] text-white rounded-lg hover:bg-[#c08850] transition flex items-center justify-center"
+                disabled={submitting || selectedCourses.length < 5}
+                className="mt-6 w-full py-2 bg-[#d89860] text-white rounded-lg hover:bg-[#c08850] transition flex items-center justify-center disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
