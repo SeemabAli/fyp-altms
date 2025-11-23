@@ -34,7 +34,6 @@ export default function GenerateSchedulePage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* Header */}
       <header className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
@@ -50,8 +49,6 @@ export default function GenerateSchedulePage() {
         </div>
         <LogoutButton />
       </header>
-
-      {/* Main */}
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 py-12 px-4">
         <div className="max-w-5xl mx-auto">
           {/* Hero Card */}
@@ -73,10 +70,7 @@ export default function GenerateSchedulePage() {
                 </p>
               </div>
             </div>
-
-            {/* Info Cards */}
             <div className="p-8 md:p-12">
-              {/* Buttons */}
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <button
                   onClick={handleGenerate}

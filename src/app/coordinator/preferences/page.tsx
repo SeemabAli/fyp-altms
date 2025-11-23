@@ -53,7 +53,6 @@ export default function CoordinatorPreferencesPage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* HEADER */}
       <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
@@ -70,10 +69,8 @@ export default function CoordinatorPreferencesPage() {
         <LogoutButton />
       </div>
 
-      {/* MAIN */}
       <div className="min-h-screen p-6 bg-gradient-to-br from-white via-gray-50 to-gray-100">
         <div className="max-w-7xl mx-auto">
-          {/* HEADER SECTION */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-[#493737] mb-2">
               Faculty Preferences
@@ -84,7 +81,6 @@ export default function CoordinatorPreferencesPage() {
             </p>
           </div>
 
-          {/* TABLE */}
           <div className="bg-white/90 rounded-2xl shadow-xl overflow-x-auto">
             <table className="w-full text-sm text-[#493737]">
               <thead className="bg-[#493737] text-white">
@@ -174,8 +170,6 @@ export default function CoordinatorPreferencesPage() {
           </div>
         </div>
       </div>
-
-      {/* DELETE MODAL */}
       <DeletePreferenceModal
         open={deleteModalOpen}
         setOpen={setDeleteModalOpen}

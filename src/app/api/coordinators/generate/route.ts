@@ -34,34 +34,27 @@ export async function POST() {
     let slotIndex = 0;
     let generatedCount = 0;
 
-    // ✅ Loop over all preferences
     for (const pref of preferences) {
       const faculty = pref.facultyId;
       if (!faculty || !pref.courses?.length) continue;
 
-      const selectedCourses = pref.courses.slice(0, 3); // pick 2–3
+      const selectedCourses = pref.courses.slice(0, 3);
 
       for (const courseId of selectedCourses) {
-        // Skip if already scheduled for this faculty
         const already = await ScheduleEntry.findOne({
           facultyId: faculty._id,
           courseId,
         });
         if (already) continue;
-
-        // Assign day and slot in round-robin (balanced)
         const day = days[dayIndex % days.length];
         const slot = slots[slotIndex % slots.length];
         const room = rooms[Math.floor(Math.random() * rooms.length)];
-
-        // Prevent conflicts — ensure same room+slot+day isn’t reused
         const conflict = await ScheduleEntry.findOne({
           day,
           slot,
           roomId: room._id,
         });
         if (conflict) {
-          // shift to next day if conflict found
           dayIndex++;
           continue;
         }
@@ -76,7 +69,6 @@ export async function POST() {
 
         generatedCount++;
 
-        // Rotate day/slot for next entry
         dayIndex++;
         if (dayIndex % days.length === 0) slotIndex++;
       }
@@ -98,7 +90,6 @@ export async function POST() {
   }
 }
 
-// ✅ DELETE endpoint (works correctly)
 export async function DELETE() {
   try {
     await connectDB();

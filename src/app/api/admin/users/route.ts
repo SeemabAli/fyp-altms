@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongoose";
 import FacultyPreference from "@/models/Faculty";
 
-// =================== GET (Fetch Users) ===================
+// =================== GET (List Users) ===================
 export async function GET() {
   try {
     await connectDB();
@@ -40,7 +40,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate random password
     const plainPassword = Math.random().toString(36).slice(-8) + "@123";
     const hashed = await bcrypt.hash(plainPassword, 10);
 
@@ -89,16 +88,14 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // If faculty, delete all their saved preferences
     if (user.role === "faculty") {
       await FacultyPreference.deleteMany({ facultyId: user._id });
       console.log(`Deleted all FacultyPreferences for ${user.name}`);
     }
 
-    // ✅ If student, delete all their enrollments (with proper model + connection)
     if (user.role === "student") {
       const { default: Enrollment } = await import("@/models/Enrollment");
-      await connectDB(); // ensure active connection for dynamic import
+      await connectDB(); 
       const deleted = await Enrollment.deleteMany({ studentId: user._id });
       console.log(
         `Deleted ${deleted.deletedCount} enrollments for ${user.name}`

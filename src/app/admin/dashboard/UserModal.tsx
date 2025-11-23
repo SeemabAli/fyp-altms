@@ -62,7 +62,7 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
     email: "",
     role: "faculty",
     designation: "",
-    department: "", // ⭐ NEW FIELD (frontend only)
+    department: "", 
   });
 
   const [loading, setLoading] = useState(false);
@@ -74,7 +74,7 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         email: selected.email || "",
         role: selected.role || "faculty",
         designation: selected.designation || "",
-        department: "", // no backend value
+        department: "", 
       });
     } else {
       setForm({
@@ -183,9 +183,7 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
           </button>
         </div>
 
-        {/* Form */}
         <div className="px-6 py-6 space-y-4">
-          {/* Name */}
           <div className="space-y-1">
             <Label htmlFor="name" className="text-gray-700 text-sm">
               Name *
@@ -199,7 +197,6 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
             />
           </div>
 
-          {/* Email */}
           <div className="space-y-1">
             <Label htmlFor="email" className="text-gray-700 text-sm">
               Email *
@@ -240,7 +237,6 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
             </select>
           </div>
 
-          {/* Faculty Designation */}
           {form.role === "faculty" && (
             <>
               <div className="space-y-1">
@@ -286,7 +282,6 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 flex justify-end gap-2">
           <button
             onClick={handleCancel}

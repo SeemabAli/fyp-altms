@@ -5,7 +5,6 @@ import { authOptions } from "@/lib/auth";
 import Enrollment from "@/models/Enrollment";
 import ScheduleEntry from "@/models/ScheduleEntry";
 
-// ✅ Force-register models (this executes their schema code)
 import "@/models/Course";
 import "@/models/Classroom";
 import "@/models/User";

@@ -7,15 +7,10 @@ import "@/models/Course";
 import "@/models/Classroom";
 import "@/models/Faculty";
 
-/**
- * GET /api/coordinators/view
- * Fetch all generated schedule entries with populated references
- */
 export async function GET() {
   try {
     await connectDB();
 
-    // ✅ Populate all referenced models properly
     const schedule = await ScheduleEntry.find()
       .populate({
         path: "courseId",
@@ -37,11 +32,9 @@ export async function GET() {
         { status: 200 }
       );
     }
-
-    // ✅ Clean response
     return NextResponse.json({ success: true, schedule }, { status: 200 });
   } catch (error: any) {
-    console.error("❌ Error fetching schedule:", error);
+    console.error("Error fetching schedule:", error);
     return NextResponse.json(
       {
         success: false,

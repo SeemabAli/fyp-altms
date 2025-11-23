@@ -50,10 +50,8 @@ export const classroomSchema = z.object({
   multimedia: z.boolean().default(false),
 });
 
-// For API validation
 export const createClassroomSchema = classroomSchema.omit({});
 
-// Type exports
 export type Classroom = z.infer<typeof classroomSchema>;
 export type CreateClassroomRequest = z.infer<typeof createClassroomSchema>;
 
@@ -69,8 +67,8 @@ export const timetableSchema = z.object({
   courseTitle: z.string(),
   room: z.string(),
   day: z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
-  startTime: z.string(), // e.g., "08:00"
-  endTime: z.string(), // e.g., "09:30"
+  startTime: z.string(), 
+  endTime: z.string(), 
   batch: z.string().optional(),
 });
 

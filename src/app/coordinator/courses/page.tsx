@@ -44,7 +44,6 @@ export default function CoordinatorCoursesPage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* HEADER */}
       <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
@@ -62,7 +61,6 @@ export default function CoordinatorCoursesPage() {
         <LogoutButton />
       </div>
 
-      {/* MAIN CONTENT AREA */}
       <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 py-10 px-4">
         <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-8">
           {/* Header Row */}
@@ -81,7 +79,6 @@ export default function CoordinatorCoursesPage() {
             </button>
           </div>
 
-          {/* Table Section */}
           <div className="overflow-x-auto rounded-xl border border-gray-100">
             <table className="min-w-full text-sm text-[#493737]">
               <thead className="bg-[#493737] text-white">
@@ -171,7 +168,6 @@ export default function CoordinatorCoursesPage() {
         </div>
       </div>
 
-      {/* MODALS */}
       <CourseModal
         open={open}
         setOpen={setOpen}

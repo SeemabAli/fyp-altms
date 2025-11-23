@@ -88,7 +88,6 @@ export default function FacultyPreferencesPage() {
 
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
-      {/* HEADER */}
       <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
@@ -106,7 +105,6 @@ export default function FacultyPreferencesPage() {
         <LogoutButton />
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white p-6 rounded-xl border-l-4 border-[#d89860] shadow-sm">
           <h1 className="text-2xl font-semibold text-[#493737] mb-2">

@@ -4,13 +4,11 @@ import { connectDB } from "@/lib/mongoose";
 import Course from "@/models/Course";
 import { courseSchema } from "@/lib/zodSchemas";
 
-// 🧠 GET all courses
 export async function GET() {
   try {
     await connectDB();
     const courses = await Course.find().sort({ createdAt: -1 }).lean();
 
-    // ✅ Add default values if fields are missing
     const formatted = courses.map((c: any) => ({
       ...c,
       creditHours: c.creditHours ?? 3,
@@ -26,7 +24,6 @@ export async function GET() {
   }
 }
 
-// 🧠 POST create new course
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -59,8 +56,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, course: newCourse });
   } catch (error: any) {
-    console.error("❌ Error creating course:", error.message);
-    console.error(error.stack); // full trace
+    console.error("Error creating course:", error.message);
+    console.error(error.stack); 
     return NextResponse.json(
       { success: false, error: "Failed to create course" },
       { status: 500 }

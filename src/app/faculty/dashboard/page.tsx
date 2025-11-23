@@ -35,7 +35,6 @@ export default function FacultyDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
-      {/* HEADER */}
       <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md relative">
         {/* Left Section */}
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
@@ -51,9 +50,7 @@ export default function FacultyDashboard() {
           </span>
         </div>
 
-        {/* Right Section */}
         <div className="flex items-center gap-4 relative">
-          {/* USER ICON (Dropdown Trigger) */}
           <button
             onClick={toggleDropdown}
             className="text-white hover:text-gray-300 focus:outline-none"
@@ -61,7 +58,6 @@ export default function FacultyDashboard() {
             <User className="w-6 h-6" />
           </button>
 
-          {/* DROPDOWN - WITHOUT LOGOUT BUTTON */}
           {open && (
             <div className="absolute right-16 top-12 w-60 bg-white text-black rounded-xl shadow-lg p-4 border border-gray-200 z-50">
               <h3 className="font-semibold text-lg text-[#493737]">
@@ -83,14 +79,11 @@ export default function FacultyDashboard() {
             </div>
           )}
 
-          {/* LOGOUT BUTTON - OUTSIDE DROPDOWN */}
           <LogoutButton />
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
       <main className="max-w-6xl mx-auto p-6">
-        {/* Dashboard Header */}
         <div className="bg-white p-6 rounded-xl mb-6 border-l-4 border-[#d89860] shadow-sm">
           <h1 className="text-2xl font-semibold text-[#493737]">
             Faculty Dashboard
@@ -115,9 +108,7 @@ export default function FacultyDashboard() {
           )}
         </div>
 
-        {/* GRID CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-          {/* 1️⃣ Course Preferences */}
           <Link href="/faculty/faculty-preferences">
             <div className="bg-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col items-center justify-center text-center border-t-4 border-[#d89860] cursor-pointer">
               <ClipboardList className="text-[#d89860] w-10 h-10 mb-3" />
@@ -130,7 +121,6 @@ export default function FacultyDashboard() {
             </div>
           </Link>
 
-          {/* 2️⃣ My Timetable */}
           <Link href="/faculty/timetable">
             <div className="bg-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col items-center justify-center text-center border-t-4 border-[#d89860] cursor-pointer">
               <CalendarDays className="text-[#d89860] w-10 h-10 mb-3" />

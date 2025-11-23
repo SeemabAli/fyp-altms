@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IPreference extends Document {
   facultyId: Types.ObjectId;
-  courses: Types.ObjectId[];      // updated to array
+  courses: Types.ObjectId[];    
   timeSlots: Types.ObjectId[];
   submittedAt: Date;
 }

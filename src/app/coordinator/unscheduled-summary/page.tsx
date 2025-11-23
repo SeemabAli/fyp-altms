@@ -55,14 +55,12 @@ export default function UnscheduledSummaryPage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* HEADER */}
       <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow-md">
         <span className="text-lg font-semibold">Unscheduled Summary</span>
         <LogoutButton />
       </div>
 
       <div className="max-w-6xl mx-auto p-6">
-        {/* MAIN CARD */}
         <div className="bg-white p-6 rounded-xl border-l-4 border-[#d89860] shadow-sm">
           <h1 className="text-2xl font-semibold text-[#493737] mb-2">
             Unscheduled Overview
@@ -101,7 +99,6 @@ export default function UnscheduledSummaryPage() {
                 )}
               </div>
 
-              {/* Unscheduled Faculty */}
               <div className="bg-gray-50 border rounded-xl p-4 shadow-sm">
                 <h2 className="text-lg font-semibold text-[#493737] mb-3 flex items-center gap-2">
                   <AlertTriangle className="text-[#d89860] w-5 h-5" /> Faculty
@@ -126,7 +123,6 @@ export default function UnscheduledSummaryPage() {
                 )}
               </div>
 
-              {/* Unscheduled Classrooms */}
               <div className="bg-gray-50 border rounded-xl p-4 shadow-sm">
                 <h2 className="text-lg font-semibold text-[#493737] mb-3 flex items-center gap-2">
                   <AlertTriangle className="text-[#d89860] w-5 h-5" />{" "}

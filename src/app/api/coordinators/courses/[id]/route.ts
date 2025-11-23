@@ -3,7 +3,6 @@ import { connectDB } from "@/lib/mongoose";
 import Course from "@/models/Course";
 import { courseSchema } from "@/lib/zodSchemas";
 
-// ✅ Get single course
 export async function GET(_req: Request, context: { params: { id: string } }) {
   try {
     await connectDB();
@@ -15,7 +14,6 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
       );
     }
 
-    // 🧠 Add defaults for old documents
     const formatted = {
       ...c,
       creditHours: c.creditHours ?? 3,
@@ -31,7 +29,6 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
   }
 }
 
-// ✅ Update a course
 export async function PUT(req: Request, context: { params: { id: string } }) {
   try {
     await connectDB();
@@ -68,7 +65,6 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 }
 
-// ✅ Delete course
 export async function DELETE(
   _req: Request,
   context: { params: { id: string } }

@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 export interface IStudent extends Document {
-  user_id: Types.ObjectId; // Reference to a general User model if you have one
+  user_id: Types.ObjectId;
   registration_no: string;
-  full_name: string; // For display purposes
+  full_name: string; 
   semester: number;
   program: string;
 }

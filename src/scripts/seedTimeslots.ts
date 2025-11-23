@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Timeslot from "@/models/Timeslot";
 
-// ✅ Load .env.local explicitly
 dotenv.config({ path: ".env.local" });
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -28,10 +27,9 @@ async function run() {
       for (let i = 0; i < slots.length; i++) {
         const { startTime, endTime } = slots[i];
 
-        // ensure idempotency (don’t duplicate)
         const exists = await Timeslot.findOne({ day, slotIndex: i });
         if (exists) {
-          console.log(`⚠️ Timeslot ${day} ${startTime}-${endTime} already exists — skipping`);
+          console.log(`Timeslot ${day} ${startTime}-${endTime} already exists — skipping`);
           continue;
         }
 
@@ -41,14 +39,14 @@ async function run() {
           endTime,
           slotIndex: i,
         });
-        console.log(`✅ Created Timeslot ${day} ${startTime}-${endTime}`);
+        console.log(`Created Timeslot ${day} ${startTime}-${endTime}`);
       }
     }
 
-    console.log("🎉 Seeding complete");
+    console.log("Seeding complete");
     process.exit(0);
   } catch (err) {
-    console.error("❌ Seed error:", err);
+    console.error("Seed error:", err);
     process.exit(1);
   }
 }

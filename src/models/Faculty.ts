@@ -12,7 +12,7 @@ const FacultyPreferenceSchema: Schema<IFacultyPreference> = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true, // One set of preferences per faculty
+      unique: true, 
     },
     courses: [
       {

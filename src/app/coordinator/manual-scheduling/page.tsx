@@ -41,7 +41,6 @@ export default function ManualSchedulingPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  // ✅ Updated: Match generation slots (5 slots per day, 08:00-16:30)
   const slots = [
     "08:00-09:30",
     "09:30-11:00",
@@ -50,7 +49,6 @@ export default function ManualSchedulingPage() {
     "15:00-16:30",
   ];
 
-  // Fetch data on mount
   useEffect(() => {
     setLoading(true);
     Promise.all([
@@ -77,7 +75,6 @@ export default function ManualSchedulingPage() {
       const data = await res.json();
 
       if (res.ok && data.users) {
-        // Filter only faculty users
         const facultyList = data.users
           .filter((user: any) => user.role === "faculty")
           .map((user: any) => ({
@@ -142,7 +139,7 @@ export default function ManualSchedulingPage() {
           day: "",
           slot: "",
         });
-        fetchUnscheduled(); // refresh unscheduled list
+        fetchUnscheduled();
       } else {
         toast.error(data.error || "Scheduling failed");
       }
@@ -155,13 +152,11 @@ export default function ManualSchedulingPage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* HEADER */}
       <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow-md">
         <span className="text-lg font-semibold">Manual Scheduling</span>
         <LogoutButton />
       </div>
 
-      {/* CONTENT */}
       <div className="min-h-screen p-6 bg-gradient-to-br from-white via-gray-50 to-gray-100">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white/90 rounded-2xl shadow-xl p-8">
@@ -173,7 +168,6 @@ export default function ManualSchedulingPage() {
               member, room, and slot.
             </p>
 
-            {/* FORM */}
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-[#493737] mb-2">
@@ -277,7 +271,6 @@ export default function ManualSchedulingPage() {
               </div>
             </div>
 
-            {/* SUBMIT BUTTON */}
             <button
               onClick={handleSubmit}
               disabled={submitting || loading}

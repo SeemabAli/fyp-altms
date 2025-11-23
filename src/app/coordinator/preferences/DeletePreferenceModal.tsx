@@ -53,7 +53,7 @@ export default function DeletePreferenceModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl border border-white/20 w-full max-w-md overflow-visible">
-        {/* Header */}
+      
         <div className="bg-gradient-to-r from-[#493737] to-[#5a4444] text-white rounded-t-2xl px-6 py-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Delete Faculty Preference</h2>
           <button
@@ -64,7 +64,6 @@ export default function DeletePreferenceModal({
           </button>
         </div>
 
-        {/* Body */}
         <div className="px-6 py-6 text-gray-700 text-sm">
           Are you sure you want to delete the preferences for{" "}
           <b className="text-[#493737]">{selected?.facultyId?.name}</b> (
@@ -84,7 +83,6 @@ export default function DeletePreferenceModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 flex justify-end gap-2">
           <button
             onClick={() => setOpen(false)}

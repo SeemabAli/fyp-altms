@@ -125,7 +125,6 @@ export default function CourseModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl border border-white/20 w-full max-w-2xl overflow-y-auto max-h-[90vh]">
-        {/* Header */}
         <div className="bg-gradient-to-r from-[#493737] to-[#5a4444] text-white rounded-t-2xl px-6 py-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">
             {selected ? "Edit Course" : "Add New Course"}
@@ -138,7 +137,6 @@ export default function CourseModal({
           </button>
         </div>
 
-        {/* Form */}
         <div className="px-6 py-6 space-y-4">
           <div className="space-y-1">
             <Label>Course Code *</Label>
@@ -238,7 +236,6 @@ export default function CourseModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 flex justify-end gap-2">
           <button
             type="button"

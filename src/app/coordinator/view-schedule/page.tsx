@@ -51,19 +51,15 @@ export default function ViewSchedulePage() {
     fetchSchedule();
   }, []);
 
-  // Get ALL entries for day and slot (not just one)
   const getEntriesForDayAndSlot = (day: string, start: string, end: string) => {
     return entries.filter((e) => {
       if (e.day !== day) return false;
 
-      // If slot is an object (populated from Timeslot)
       if (typeof e.slot === "object" && e.slot !== null) {
         return e.slot.start === start && e.slot.end === end;
       }
 
-      // If slot is a string, normalize and compare
       if (typeof e.slot === "string") {
-        // Remove all spaces and convert to lowercase for comparison
         const normalizedSlot = e.slot.replace(/\s+/g, "").toLowerCase();
         const normalizedSearch = `${start}-${end}`
           .replace(/\s+/g, "")
@@ -75,22 +71,19 @@ export default function ViewSchedulePage() {
     });
   };
 
-  // ✅ Function to get background color based on index
   const getCardColor = (index: number) => {
-    if (index === 0) return "bg-[#d89860]"; // Original color for 1st entry
-    if (index === 1) return "bg-[#6b8e9f]"; // Blue-grey for 2nd entry
-    return "bg-[#8b7ba8]"; // Purple for 3rd+ entry
+    if (index === 0) return "bg-[#d89860]"; 
+    if (index === 1) return "bg-[#6b8e9f]"; 
+    return "bg-[#8b7ba8]"; 
   };
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* Header */}
       <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center">
         <span className="text-lg font-semibold">View Schedule</span>
         <LogoutButton />
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-sm border-l-4 border-[#d89860] p-6">
           <div className="flex justify-between items-center mb-6">

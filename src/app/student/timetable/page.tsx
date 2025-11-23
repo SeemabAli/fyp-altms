@@ -62,7 +62,6 @@ export default function StudentTimetablePage() {
     }
   };
 
-  // Get all entries for a specific day and slot
   const getEntriesForDayAndSlot = (day: string, start: string, end: string) => {
     return timetable.filter((e) => {
       if (e.day !== day) return false;
@@ -79,7 +78,6 @@ export default function StudentTimetablePage() {
     });
   };
 
-  // Get background color based on index
   const getCardColor = (index: number) => {
     if (index === 0) return "bg-[#d89860]";
     if (index === 1) return "bg-[#6b8e9f]";
@@ -94,10 +92,8 @@ export default function StudentTimetablePage() {
         <LogoutButton />
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Student Info Card */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-4 border-[#d89860] mb-6">
             <div className="bg-gradient-to-r from-[#493737] to-[#5a4545] text-white px-8 py-6">
               {session?.user?.name ? (
@@ -133,7 +129,6 @@ export default function StudentTimetablePage() {
             </div>
           </div>
 
-          {/* Timetable Card */}
           <div className="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-[#d89860]">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">

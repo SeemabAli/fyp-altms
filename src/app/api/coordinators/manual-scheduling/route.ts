@@ -7,7 +7,6 @@ import ScheduleEntry from "@/models/ScheduleEntry";
 export async function POST(req: Request) {
   try {
     await connectDB();
-    // ✅ FIX: Receive 'roomId' from the frontend form
     const { courseId, facultyId, roomId, slot, day } = await req.json();
 
     if (!courseId || !facultyId || !roomId || !slot || !day) {
@@ -21,11 +20,10 @@ export async function POST(req: Request) {
     if (exists) {
       return NextResponse.json(
         { error: "Faculty already has a class in this slot" },
-        { status: 409 } // 409 Conflict is more suitable
+        { status: 409 } 
       );
     }
 
-    // Check for room conflict as well
     const roomTaken = await ScheduleEntry.findOne({ roomId, slot, day });
     if (roomTaken) {
       return NextResponse.json(
@@ -37,7 +35,7 @@ export async function POST(req: Request) {
     const entry = await ScheduleEntry.create({
       courseId,
       facultyId,
-      roomId, // ✅ FIX: Save 'roomId' to match the schema
+      roomId, 
       slot,
       day,
     });

@@ -34,7 +34,6 @@ export default function CoordinatorClassroomsPage() {
     multimedia: false,
   });
 
-  // new fields for structured naming
   const [buildingNo, setBuildingNo] = useState("");
   const [floorNo, setFloorNo] = useState("");
   const [roomNo, setRoomNo] = useState("");
@@ -81,7 +80,6 @@ export default function CoordinatorClassroomsPage() {
       return;
     }
 
-    // generate name automatically
     const generatedName = `B${buildingNo}-F${floorNo}-R${roomNo}`;
 
     setSaving(true);
@@ -133,7 +131,6 @@ export default function CoordinatorClassroomsPage() {
       multimedia: classroom.multimedia,
     });
 
-    // auto-extract numbers if name format matches B1-F2-R8
     const match = classroom.name.match(/B(\d+)-F(\d+)-R(\d+)/);
     if (match) {
       setBuildingNo(match[1]);
@@ -156,7 +153,6 @@ export default function CoordinatorClassroomsPage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      {/* HEADER */}
       <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
@@ -173,9 +169,7 @@ export default function CoordinatorClassroomsPage() {
         <LogoutButton />
       </div>
 
-      {/* MAIN */}
       <div className="max-w-6xl mx-auto p-6">
-        {/* TITLE */}
         <div className="bg-white p-6 rounded-xl mb-6 border-l-4 shadow-sm border-[#d89860] flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-semibold text-[#493737]">
@@ -186,9 +180,6 @@ export default function CoordinatorClassroomsPage() {
             </p>
           </div>
         </div>
-
-        {/* FORM */}
-        {/* FORM */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
           <h2 className="text-lg font-semibold text-[#493737] mb-4 flex items-center gap-2">
             <Plus className="text-[#d89860]" />
@@ -196,7 +187,6 @@ export default function CoordinatorClassroomsPage() {
           </h2>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Building / Floor / Room */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
                 Building No
@@ -244,8 +234,6 @@ export default function CoordinatorClassroomsPage() {
                 }}
               />
             </div>
-
-            {/* Capacity */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
                 Capacity
@@ -261,8 +249,6 @@ export default function CoordinatorClassroomsPage() {
                 }}
               />
             </div>
-
-            {/* Type */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">Type</label>
               <select
@@ -276,8 +262,6 @@ export default function CoordinatorClassroomsPage() {
                 <option value="lab">Lab</option>
               </select>
             </div>
-
-            {/* Multimedia */}
             <div className="flex flex-col gap-2 justify-end">
               <label className="text-sm font-medium text-gray-700">
                 Multimedia
@@ -294,8 +278,6 @@ export default function CoordinatorClassroomsPage() {
               </label>
             </div>
           </div>
-
-          {/* Preview the generated name */}
           {buildingNo && floorNo && roomNo && (
             <p className="text-sm text-gray-600 mt-2">
               <span className="font-semibold text-[#493737]">
@@ -328,8 +310,6 @@ export default function CoordinatorClassroomsPage() {
             )}
           </div>
         </div>
-
-        {/* TABLE */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <table className="w-full border-collapse">
             <thead className="bg-[#493737] text-white text-sm">

@@ -23,7 +23,6 @@ const EnrollmentSchema: Schema<IEnrollment> = new Schema(
   { timestamps: true }
 );
 
-// Prevent duplicates — one student per course
 EnrollmentSchema.index({ studentId: 1, courseId: 1 }, { unique: true });
 
 const Enrollment: Model<IEnrollment> =

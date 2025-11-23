@@ -6,7 +6,7 @@ export const logout = async () => {
   try {
     await signOut({
       redirect: true,
-      callbackUrl: "/auth/signin", // ✅ send user to home page after logout
+      callbackUrl: "/auth/signin",
     });
   } catch (error) {
     console.error("Logout error:", error);

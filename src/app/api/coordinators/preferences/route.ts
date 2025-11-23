@@ -15,11 +15,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Fetch all faculty preferences with faculty + course info
     const preferences = await FacultyPreference.find()
       .populate("facultyId", "name email designation")
       .populate("courses", "code title")
-      .sort({ timestamp: 1 }); // older first (tie-breaker)
+      .sort({ timestamp: 1 }); 
 
     return NextResponse.json({ success: true, preferences });
   } catch (error) {

@@ -7,7 +7,6 @@ import { authOptions } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 import { createClassroomSchema } from "@/lib/zodSchemas";
 
-// Fixed time slots: 08:00–16:30, 5 slots per day
 const FIXED_TIME_SLOTS = [
   { startTime: "08:00", endTime: "10:00" },
   { startTime: "10:00", endTime: "12:00" },

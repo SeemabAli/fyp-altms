@@ -6,7 +6,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import mongoose from "mongoose";
 
-// Define Booking Schema
 const BookingSchema = new mongoose.Schema(
   {
     classroomId: { type: String, required: true },
@@ -56,7 +55,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate all bookings
     for (const booking of bookings) {
       if (!booking.classroomId || !booking.selectedSlots.length) {
         return NextResponse.json(
@@ -65,7 +63,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // Check capacity requirements
       if (requiredCapacity && booking.capacity < requiredCapacity) {
         return NextResponse.json(
           {
@@ -75,7 +72,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // Check multimedia requirements
       if (requiresMultimedia && !booking.multimedia) {
         return NextResponse.json(
           { error: `${booking.classroomName} does not have multimedia` },
@@ -84,7 +80,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // Save all bookings
     const savedBookings = await Booking.insertMany(
       bookings.map((booking: any) => ({
         ...booking,

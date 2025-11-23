@@ -19,7 +19,6 @@ export async function DELETE(
 
     const { id } = params;
 
-    // First, find the preference to get the facultyId
     const preference = await FacultyPreference.findById(id);
 
     if (!preference) {
@@ -29,13 +28,10 @@ export async function DELETE(
       );
     }
 
-    // Get the facultyId from the preference
     const facultyId = preference.facultyId;
 
-    // Delete the preference
     await FacultyPreference.findByIdAndDelete(id);
 
-    // Delete all schedules associated with this faculty
     const scheduleDeleteResult = await ScheduleEntry.deleteMany({
       facultyId: facultyId,
     });

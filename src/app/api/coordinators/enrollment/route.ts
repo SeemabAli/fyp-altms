@@ -10,14 +10,12 @@ export async function GET() {
   try {
     await connectDB();
 
-    // ✅ Step 1: check if any students exist
     const studentsExist = await User.exists({ role: "student" });
 
-    // ✅ Step 2: if no students, clear all enrollments
     if (!studentsExist) {
       const { default: Enrollment } = await import("@/models/Enrollment");
       await Enrollment.deleteMany({});
-      console.log("⚠️ No students found — cleared all enrollments from DB.");
+      console.log("No students found — cleared all enrollments from DB.");
 
       return NextResponse.json({
         success: true,
@@ -25,20 +23,16 @@ export async function GET() {
         message: "No students found, all enrollments cleared.",
       });
     }
-
-    // ✅ Step 3: normal behavior
     const enrollments = await Enrollment.find()
       .populate("studentId", "name email batch")
       .populate("courseId", "code title");
 
-    // ✅ Step 4: also filter any orphaned ones (studentId = null)
     const validEnrollments = enrollments.filter((e) => e.studentId);
 
-    // Optional: clean DB of orphaned enrollments permanently
     const orphanIds = enrollments.filter((e) => !e.studentId).map((e) => e._id);
     if (orphanIds.length > 0) {
       await Enrollment.deleteMany({ _id: { $in: orphanIds } });
-      console.log(`🧹 Removed ${orphanIds.length} orphan enrollments`);
+      console.log(`Removed ${orphanIds.length} orphan enrollments`);
     }
 
     return NextResponse.json({ success: true, enrollments: validEnrollments });
@@ -66,7 +60,6 @@ export async function POST(req: Request) {
 
     const { studentId, courseId } = parsed.data;
 
-    // Verify both exist
     const student = await User.findOne({ _id: studentId, role: "student" });
     const course = await Course.findById(courseId);
 
@@ -77,7 +70,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create enrollment (unique constraint will handle duplicates)
     const newEnrollment = await Enrollment.create({ studentId, courseId });
 
     return NextResponse.json({ success: true, newEnrollment });

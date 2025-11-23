@@ -4,7 +4,6 @@ import { connectDB } from "@/lib/mongoose";
 import Classroom from "@/models/Classroom";
 import { classroomSchema } from "@/lib/zodSchemas";
 
-// ✅ Get one classroom by ID
 export async function GET(_req: Request, context: { params: { id: string } }) {
   try {
     await connectDB();
@@ -25,7 +24,6 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
   }
 }
 
-// ✅ Update classroom by ID
 export async function PUT(req: Request, context: { params: { id: string } }) {
   try {
     await connectDB();
@@ -61,7 +59,6 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 }
 
-// ✅ Delete classroom by ID
 export async function DELETE(
   _req: Request,
   context: { params: { id: string } }

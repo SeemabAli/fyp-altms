@@ -52,13 +52,9 @@ export default function UserDeleteModal({
             <X className="w-5 h-5 text-white" />
           </button>
         </div>
-
-        {/* Body */}
         <div className="px-6 py-6 text-gray-700 text-sm">
           Are you sure you want to delete <b>{selected?.name}</b>?
         </div>
-
-        {/* Footer */}
         <div className="px-6 py-4 flex justify-end gap-2">
           <button
             onClick={() => setOpen(false)}

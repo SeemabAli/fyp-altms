@@ -30,7 +30,6 @@ export async function PUT(
     const body = await req.json();
     const { name, email, role, designation } = body;
 
-    // Validate required fields
     if (!name || !email || !role) {
       return NextResponse.json(
         { error: "Name, email, and role are required" },
@@ -38,7 +37,6 @@ export async function PUT(
       );
     }
 
-    // Check if email is already taken by another user
     const existingUser = await User.findOne({
       email,
       _id: { $ne: params.id },
@@ -51,14 +49,13 @@ export async function PUT(
       );
     }
 
-    // Update user
     const updatedUser = await User.findByIdAndUpdate(
       params.id,
       {
         name,
         email,
         role,
-        designation: role === "faculty" ? designation : null, // ✅ same condition as create
+        designation: role === "faculty" ? designation : null,
       },
       { new: true, runValidators: true }
     );

@@ -45,13 +45,11 @@ export default function ScheduleDeleteModal({ open, setOpen, refresh }: Props) {
           </button>
         </div>
 
-        {/* Body */}
         <div className="px-6 py-6 text-gray-700 text-sm">
           Are you sure you want to <b>delete all generated schedules</b>? <br />
           This action cannot be undone.
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 flex justify-end gap-2">
           <button
             onClick={() => setOpen(false)}

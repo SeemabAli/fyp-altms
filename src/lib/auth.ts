@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/lib/auth.ts
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import User from "@/models/User";
@@ -8,16 +7,13 @@ import { connectDB } from "@/lib/mongoose";
 import type { JWT } from "next-auth/jwt";
 import type { Session } from "next-auth";
 
-/**
- * Local custom types for this file
- */
 interface CustomUser {
   id: string;
   email: string;
   role: "admin" | "coordinator" | "faculty" | "student";
   name?: string | null;
   designation?: string | null;
-  batch?: string; // optional for students
+  batch?: string; 
 }
 
 interface CustomSession extends Session {
@@ -28,7 +24,7 @@ interface CustomSession extends Session {
     name?: string | null;
     designation?: string | null;
     image?: string | null;
-    batch?: string; // optional
+    batch?: string;
   };
 }
 
@@ -60,7 +56,6 @@ export const authOptions: NextAuthOptions = {
 
           const id = userDoc._id?.toString?.() ?? "";
 
-          // Include all required fields for session
           const returnedUser: CustomUser = {
             id,
             email: userDoc.email,
@@ -80,7 +75,6 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    // JWT callback: store full user info in token
     async jwt({ token, user }): Promise<JWT> {
       if (user) {
         const u = user as CustomUser;
@@ -94,7 +88,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
 
-    // Session callback: build session.user with all details
     async session({ session, token }): Promise<CustomSession> {
       const s = session as CustomSession;
       s.user = {

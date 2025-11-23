@@ -9,20 +9,17 @@ export async function GET() {
   try {
     await connectDB();
 
-    // Find scheduled course IDs
     const scheduledCourses = await ScheduleEntry.find().distinct("courseId");
     const unscheduledCourses = await Course.find({
       _id: { $nin: scheduledCourses },
     });
 
-    // Find faculty who have preferences but no assigned schedule
     const scheduledFaculty = await ScheduleEntry.find().distinct("facultyId");
     const unscheduledFaculty = await User.find({
       role: "faculty",
       _id: { $nin: scheduledFaculty },
     });
 
-    // Find rooms/labs not assigned in any schedule entry
     const scheduledRooms = await ScheduleEntry.find().distinct("classroomId");
     const unscheduledRooms = await Classroom.find({
       _id: { $nin: scheduledRooms },

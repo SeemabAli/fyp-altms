@@ -25,7 +25,6 @@ export default function AdminDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Fetch all users
   const fetchUsers = async () => {
     try {
       const res = await fetch("/api/admin/users");
@@ -44,9 +43,8 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      {/* HEADER */}
       <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md relative">
-        {/* Left Section */}
+        
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
@@ -60,14 +58,10 @@ export default function AdminDashboard() {
           </span>
         </div>
 
-        {/* Right Section */}
         <div className="flex items-center gap-4 relative">
-          {/* LOGOUT BUTTON OUTSIDE */}
           <LogoutButton />
         </div>
       </header>
-
-      {/* MAIN */}
       <div className="max-w-6xl mx-auto p-6">
         <div className="bg-white p-6 rounded-xl mb-6 border-l-4 shadow-sm border-[#d89860] flex justify-between items-center">
           <div>
@@ -89,7 +83,6 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* USERS TABLE */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <table className="w-full border-collapse">
             <thead className="bg-[#493737] text-white text-sm">
@@ -162,7 +155,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* MODALS */}
       <UserModal
         open={modalOpen}
         setOpen={setModalOpen}

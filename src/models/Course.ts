@@ -23,7 +23,6 @@ const CourseSchema = new Schema<ICourse>(
   { timestamps: true }
 );
 
-// ✅ Safe re-use for hot reloads
 const Course =
   (models?.Course as Model<ICourse>) ||
   model<ICourse>("Course", CourseSchema);

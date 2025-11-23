@@ -60,8 +60,6 @@ export async function POST(req: Request) {
 
     const { preferences } = parsed.data;
     const facultyId = session.user.id;
-
-    // Check if already submitted
     const existing = await FacultyPreference.findOne({ facultyId });
     if (existing) {
       return NextResponse.json(
@@ -70,7 +68,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate courses exist
     const validCourses = await Course.find({
       _id: { $in: preferences },
     });

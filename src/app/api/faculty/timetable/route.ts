@@ -13,7 +13,6 @@ export async function GET() {
 
     await connectDB();
 
-    // ✅ match facultyId not faculty
     const timetable = await ScheduleEntry.find({
       facultyId: session.user.id,
     })

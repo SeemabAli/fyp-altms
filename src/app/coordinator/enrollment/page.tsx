@@ -87,7 +87,6 @@ export default function EnrollmentPage() {
 
     setSubmitting(true);
     try {
-      // Enroll student in all selected courses
       const enrollmentResults = await Promise.all(
         selectedCourses.map(async (courseId) => {
           const res = await fetch("/api/coordinators/enrollment", {
@@ -130,14 +129,11 @@ export default function EnrollmentPage() {
             toast.error(`${courseName}: ${f.data.error || "Failed to enroll"}`);
           }
         });
-
-        // Remove successfully enrolled courses from selection
         setSelectedCourses((prev) =>
           prev.filter((id) => failed.some((f) => f.courseId === id))
         );
         fetchData();
       } else {
-        // All failed
         failed.forEach((f) => {
           const course = courses.find((c) => c._id === f.courseId);
           const courseName = course ? `${course.code}` : "Course";
@@ -181,7 +177,6 @@ export default function EnrollmentPage() {
 
       <div className="min-h-screen p-6 bg-gradient-to-br from-white via-gray-50 to-gray-100">
         <div className="max-w-6xl mx-auto">
-          {/* ADD ENROLLMENT SECTION */}
           <div className="bg-white/90 rounded-2xl shadow-xl p-8 mb-8">
             <h1 className="text-3xl font-bold text-[#493737] mb-2">
               Enroll Students to Courses
@@ -192,7 +187,6 @@ export default function EnrollmentPage() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6">
-              {/* Student Selection */}
               <div>
                 <label className="block text-sm font-semibold text-[#493737] mb-2">
                   Select Student
@@ -219,8 +213,6 @@ export default function EnrollmentPage() {
                   ))}
                 </select>
               </div>
-
-              {/* Course Checkboxes */}
               <div>
                 <label className="block text-sm font-semibold text-[#493737] mb-2">
                   Select Courses
@@ -279,7 +271,6 @@ export default function EnrollmentPage() {
             </button>
           </div>
 
-          {/* ENROLLED TABLE */}
           <div className="bg-white/90 rounded-2xl shadow-xl overflow-x-auto">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-2xl font-bold text-[#493737]">

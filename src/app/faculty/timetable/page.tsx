@@ -41,7 +41,6 @@ export default function FacultyTimetable() {
     fetchTimetable();
   }, []);
 
-  // Sort by weekday order
   const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const sortedTimetable = [...timetable].sort(
     (a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day)
@@ -49,7 +48,6 @@ export default function FacultyTimetable() {
 
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
-      {/* HEADER */}
       <div className="bg-[#3d2e2e] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
         <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
@@ -68,9 +66,7 @@ export default function FacultyTimetable() {
         </button>
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="max-w-6xl mx-auto p-6">
-        {/* Card Header */}
         <div className="bg-white p-6 rounded-xl mb-6 border-l-4 border-[#d89860] shadow-sm">
           <h1 className="text-2xl font-semibold text-[#3d2e2e]">
             My Timetable
@@ -87,7 +83,6 @@ export default function FacultyTimetable() {
           )}
         </div>
 
-        {/* Timetable */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           {loading ? (
             <div className="text-center py-10 text-gray-500">
