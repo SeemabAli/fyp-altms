@@ -34,6 +34,10 @@ export default function EnrollmentPage() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStudent, setModalStudent] = useState<any>(null);
+  const [modalCourses, setModalCourses] = useState<any[]>([]);
+  const [modalEnrollmentIds, setModalEnrollmentIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -102,7 +106,6 @@ export default function EnrollmentPage() {
         })
       );
 
-      // Categorize results
       const successful = enrollmentResults.filter((r) => r.res.ok);
       const failed = enrollmentResults.filter((r) => !r.res.ok);
 
@@ -115,10 +118,7 @@ export default function EnrollmentPage() {
         setSelectedCourses([]);
         fetchData();
       } else if (successful.length > 0 && failed.length > 0) {
-        // Some succeeded, some failed
         toast.success(`${successful.length} course(s) enrolled successfully`);
-
-        // Show specific error messages for failed enrollments
         failed.forEach((f) => {
           const course = courses.find((c) => c._id === f.courseId);
           const courseName = course ? `${course.code}` : "Course";
@@ -152,21 +152,56 @@ export default function EnrollmentPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const openCourseModal = (group: any) => {
+    setModalStudent(group.student);
+    setModalCourses(group.courses);
+    setModalEnrollmentIds(group.enrollmentIds);
+    setModalOpen(true);
+  };
+
+  const handleModalDelete = async (enrollmentId: string) => {
     try {
-      const res = await fetch(`/api/coordinators/enrollment/${id}`, {
+      const res = await fetch(`/api/coordinators/enrollment/${enrollmentId}`, {
         method: "DELETE",
       });
+
       if (res.ok) {
-        toast.success("Enrollment removed");
-        setEnrollments((prev) => prev.filter((e) => e._id !== id));
+        toast.success("Course removed");
+
+        // remove from modal list
+        setModalCourses((prev) =>
+          prev.filter((_, idx) => modalEnrollmentIds[idx] !== enrollmentId)
+        );
+        setModalEnrollmentIds((prev) =>
+          prev.filter((id) => id !== enrollmentId)
+        );
+
+        // remove from main table
+        setEnrollments((prev) => prev.filter((e) => e._id !== enrollmentId));
       } else {
-        toast.error("Failed to delete enrollment");
+        toast.error("Failed to delete");
       }
     } catch {
-      toast.error("Error deleting enrollment");
+      toast.error("Error deleting course");
     }
   };
+
+  const groupedEnrollments = enrollments.reduce((acc: any, e) => {
+    const studentId = e.studentId._id;
+
+    if (!acc[studentId]) {
+      acc[studentId] = {
+        student: e.studentId,
+        courses: [],
+        enrollmentIds: [],
+      };
+    }
+
+    acc[studentId].courses.push(e.courseId);
+    acc[studentId].enrollmentIds.push(e._id);
+
+    return acc;
+  }, {});
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
@@ -298,46 +333,105 @@ export default function EnrollmentPage() {
                       Loading enrollments...
                     </td>
                   </tr>
-                ) : enrollments.length === 0 ? (
+                ) : Object.keys(groupedEnrollments).length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-8 text-gray-500">
                       No enrollments found.
                     </td>
                   </tr>
                 ) : (
-                  enrollments.map((e, idx) => (
-                    <tr
-                      key={e._id}
-                      className="border-b hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-4 py-3">{idx + 1}</td>
-                      <td className="px-4 py-3 font-medium">
-                        {e.studentId?.name}
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {e.studentId?.email}
-                      </td>
-                      <td className="px-4 py-3 font-semibold text-[#d89860]">
-                        {e.courseId?.code}
-                      </td>
-                      <td className="px-4 py-3">{e.courseId?.title}</td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => handleDelete(e._id)}
-                          className="p-2 rounded-lg bg-red-100 hover:bg-red-200 transition text-red-600"
-                          title="Delete enrollment"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  Object.values(groupedEnrollments).map(
+                    (group: any, idx: number) => (
+                      <tr
+                        key={group.student._id}
+                        className="border-b hover:bg-gray-50 transition"
+                      >
+                        <td className="px-4 py-3">{idx + 1}</td>
+                        <td className="px-4 py-3 font-medium">
+                          {group.student.name}
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">
+                          {group.student.email}
+                        </td>
+
+                        {/* COURSE LIST */}
+                        <td className="px-4 py-3 font-semibold text-[#d89860]">
+                          {group.courses.map((c: any) => c.code).join(", ")}
+                        </td>
+                        <td className="px-4 py-3">
+                          {group.courses.map((c: any) => c.title).join(", ")}
+                        </td>
+
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => openCourseModal(group)}
+                            className="px-4 py-2 bg-gradient-to-r from-[#d89860] to-[#e0a670] 
+               text-white rounded-lg hover:shadow-md transition font-medium"
+                          >
+                            View Courses ({group.courses.length})
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )
                 )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+            <h2 className="text-xl font-bold text-[#493737] mb-2">
+              {modalStudent.name}
+            </h2>
+            <p className="text-gray-600 mb-4">{modalStudent.email}</p>
+
+            <h3 className="text-lg font-semibold text-[#493737] mb-3">
+              Enrolled Courses
+            </h3>
+
+            {modalCourses.length === 0 ? (
+              <p className="text-gray-500 text-sm">No courses left.</p>
+            ) : (
+              <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                {modalCourses.map((course, idx) => (
+                  <div
+                    key={modalEnrollmentIds[idx]}
+                    className="flex justify-between items-center bg-gray-50 p-3 rounded-lg"
+                  >
+                    <div>
+                      <p className="font-semibold text-[#d89860]">
+                        {course.code}
+                      </p>
+                      <p className="text-sm text-[#493737]">{course.title}</p>
+                    </div>
+
+                    <button
+                      onClick={() => handleModalDelete(modalEnrollmentIds[idx])}
+                      className="p-2 rounded-lg bg-red-100 hover:bg-red-200 
+                           transition text-red-600"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="w-full py-3 bg-[#493737] text-white rounded-lg 
+                     hover:opacity-90 transition font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }
