@@ -8,6 +8,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, X } from "lucide-react";
 
+const departments = [
+  "Accounting & Finance",
+  "B.Ed. (Hons) Elementary",
+  "B.Ed. (Hons.) Early Childhood Care and Education",
+  "Bachelor of Business & Information Technology (BBIT)",
+  "Bioinformatics",
+  "Biotechnology",
+  "Business Administration",
+  "Commerce",
+  "Computer Science",
+  "Data Science",
+  "Economics",
+  "English (Applied Linguistics)",
+  "Information Technology",
+  "Islamic Studies",
+  "Mass Communication",
+  "Mathematics",
+  "Psychology",
+  "Public Administration",
+  "Sociology",
+  "Software Engineering",
+  "Statistics",
+  "Zoology",
+];
+
+// Update schema (department NOT sent to backend)
 const userSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
@@ -36,7 +62,9 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
     email: "",
     role: "faculty",
     designation: "",
+    department: "", // ⭐ NEW FIELD (frontend only)
   });
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -46,9 +74,16 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         email: selected.email || "",
         role: selected.role || "faculty",
         designation: selected.designation || "",
+        department: "", // no backend value
       });
     } else {
-      setForm({ name: "", email: "", role: "faculty", designation: "" });
+      setForm({
+        name: "",
+        email: "",
+        role: "faculty",
+        designation: "",
+        department: "",
+      });
     }
   }, [selected]);
 
@@ -60,9 +95,16 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         email: selected.email || "",
         role: selected.role || "faculty",
         designation: selected.designation || "",
+        department: "",
       });
     } else {
-      setForm({ name: "", email: "", role: "faculty", designation: "" });
+      setForm({
+        name: "",
+        email: "",
+        role: "faculty",
+        designation: "",
+        department: "",
+      });
     }
   };
 
@@ -80,9 +122,13 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         ? `/api/admin/users/${selected._id}`
         : "/api/admin/users";
 
-      // Only send designation if role is faculty
+      // Remove department before sending to backend
       const payload: any = { ...form };
-      if (form.role !== "faculty") delete payload.designation;
+      delete payload.department;
+
+      if (form.role !== "faculty") {
+        delete payload.designation;
+      }
 
       const res = await fetch(url, {
         method,
@@ -112,8 +158,6 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
 
       refresh();
       setOpen(false);
-      if (!selected)
-        setForm({ name: "", email: "", role: "faculty", designation: "" });
     } catch (e: any) {
       toast.error(e.message || "Error saving user");
     } finally {
@@ -141,6 +185,7 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
 
         {/* Form */}
         <div className="px-6 py-6 space-y-4">
+          {/* Name */}
           <div className="space-y-1">
             <Label htmlFor="name" className="text-gray-700 text-sm">
               Name *
@@ -151,10 +196,10 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Enter name"
               disabled={loading}
-              className="border-gray-300 focus:border-[#d89860] focus:ring-[#d89860]/50"
             />
           </div>
 
+          {/* Email */}
           <div className="space-y-1">
             <Label htmlFor="email" className="text-gray-700 text-sm">
               Email *
@@ -166,10 +211,10 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="Enter email"
               disabled={loading}
-              className="border-gray-300 focus:border-[#d89860] focus:ring-[#d89860]/50"
             />
           </div>
 
+          {/* Role */}
           <div className="space-y-1">
             <Label htmlFor="role" className="text-gray-700 text-sm">
               Role *
@@ -178,10 +223,15 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
               id="role"
               value={form.role}
               onChange={(e) =>
-                setForm({ ...form, role: e.target.value, designation: "" })
+                setForm({
+                  ...form,
+                  role: e.target.value,
+                  designation: "",
+                  department: "",
+                })
               }
               disabled={loading}
-              className="w-full border rounded-md px-3 py-2 border-gray-300 focus:border-[#d89860] focus:ring-[#d89860]/50"
+              className="w-full border rounded-md px-3 py-2"
             >
               <option value="faculty">Faculty</option>
               <option value="student">Student</option>
@@ -192,26 +242,47 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
 
           {/* Faculty Designation */}
           {form.role === "faculty" && (
-            <div className="space-y-1">
-              <Label htmlFor="designation" className="text-gray-700 text-sm">
-                Designation *
-              </Label>
-              <select
-                id="designation"
-                value={form.designation}
-                onChange={(e) =>
-                  setForm({ ...form, designation: e.target.value })
-                }
-                disabled={loading}
-                className="w-full border rounded-md px-3 py-2 border-gray-300 focus:border-[#d89860] focus:ring-[#d89860]/50"
-              >
-                <option value="">Select designation</option>
-                <option value="Professor">Professor</option>
-                <option value="Associate Professor">Associate Professor</option>
-                <option value="Assistant Professor">Assistant Professor</option>
-                <option value="Lecturer">Lecturer</option>
-              </select>
-            </div>
+            <>
+              <div className="space-y-1">
+                <Label className="text-gray-700 text-sm">Designation *</Label>
+                <select
+                  value={form.designation}
+                  onChange={(e) =>
+                    setForm({ ...form, designation: e.target.value })
+                  }
+                  disabled={loading}
+                  className="w-full border rounded-md px-3 py-2"
+                >
+                  <option value="">Select designation</option>
+                  <option value="Professor">Professor</option>
+                  <option value="Associate Professor">
+                    Associate Professor
+                  </option>
+                  <option value="Assistant Professor">
+                    Assistant Professor
+                  </option>
+                  <option value="Lecturer">Lecturer</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-gray-700 text-sm">Department</Label>
+                <select
+                  value={form.department}
+                  onChange={(e) =>
+                    setForm({ ...form, department: e.target.value })
+                  }
+                  disabled={loading}
+                  className="w-full border rounded-md px-3 py-2"
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
           )}
         </div>
 
@@ -219,15 +290,15 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         <div className="px-6 py-4 flex justify-end gap-2">
           <button
             onClick={handleCancel}
-            disabled={loading}
-            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
           >
             Cancel
           </button>
+
           <button
             onClick={handleSave}
             disabled={loading}
-            className="bg-gradient-to-r from-[#d89860] to-[#e0a670] text-white px-4 py-2 rounded-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2 transition"
+            className="bg-gradient-to-r from-[#d89860] to-[#e0a670] text-white px-4 py-2 rounded-md flex items-center gap-2"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? "Saving..." : "Save"}
