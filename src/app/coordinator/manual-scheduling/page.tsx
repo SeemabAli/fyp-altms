@@ -353,7 +353,7 @@ export default function ManualSchedulingPage() {
           <div className="bg-white/90 rounded-2xl shadow-xl overflow-x-auto">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-2xl font-bold text-[#493737]">
-                Manually Scheduled Courses
+                Scheduled Courses
               </h2>
               <p className="text-gray-600 text-sm mt-1">
                 View and manage manually scheduled courses
