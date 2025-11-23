@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
 import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 
 interface Course {
   _id: string;
@@ -26,10 +26,32 @@ interface Classroom {
   name?: string;
 }
 
+interface ScheduleEntry {
+  _id: string;
+  courseId: {
+    _id: string;
+    code: string;
+    title: string;
+  };
+  facultyId: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  roomId: {
+    _id: string;
+    classroomId?: string;
+    name?: string;
+  };
+  day: string;
+  slot: string;
+}
+
 export default function ManualSchedulingPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [schedules, setSchedules] = useState<ScheduleEntry[]>([]);
   const [form, setForm] = useState({
     courseId: "",
     facultyId: "",
@@ -39,6 +61,7 @@ export default function ManualSchedulingPage() {
   });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const slots = [
@@ -55,6 +78,7 @@ export default function ManualSchedulingPage() {
       fetchUnscheduled(),
       fetchFaculties(),
       fetchClassrooms(),
+      fetchSchedules(),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -105,6 +129,18 @@ export default function ManualSchedulingPage() {
     }
   };
 
+  const fetchSchedules = async () => {
+    try {
+      const res = await fetch("/api/coordinators/manual-scheduling");
+      const data = await res.json();
+      if (res.ok) {
+        setSchedules(data.data || []);
+      }
+    } catch {
+      toast.error("Failed to fetch schedules");
+    }
+  };
+
   const handleChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -140,6 +176,7 @@ export default function ManualSchedulingPage() {
           slot: "",
         });
         fetchUnscheduled();
+        fetchSchedules();
       } else {
         toast.error(data.error || "Scheduling failed");
       }
@@ -150,25 +187,51 @@ export default function ManualSchedulingPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+
+    try {
+      const res = await fetch(`/api/coordinators/manual-scheduling/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Schedule deleted successfully");
+        fetchSchedules();
+        fetchUnscheduled();
+      } else {
+        toast.error(data.error || "Failed to delete schedule");
+      }
+    } catch {
+      toast.error("Error deleting schedule");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
+      {/* Top bar identical to EnrollmentPage */}
       <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow-md">
         <span className="text-lg font-semibold">Manual Scheduling</span>
         <LogoutButton />
       </div>
 
       <div className="min-h-screen p-6 bg-gradient-to-br from-white via-gray-50 to-gray-100">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white/90 rounded-2xl shadow-xl p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Form Card - styled to match EnrollmentPage */}
+          <div className="bg-white/90 rounded-2xl shadow-xl p-8 mb-8">
             <h1 className="text-3xl font-bold text-[#493737] mb-2">
               Assign Unscheduled Courses
             </h1>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 mb-6">
               Select an unscheduled course and manually assign it to a faculty
               member, room, and slot.
             </p>
 
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-semibold text-[#493737] mb-2">
                   Unscheduled Course
@@ -274,16 +337,105 @@ export default function ManualSchedulingPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting || loading}
-              className="mt-8 w-full py-3 bg-gradient-to-r from-[#d89860] to-[#e0a670] text-white rounded-lg hover:shadow-lg hover:scale-105 transition font-semibold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-gradient-to-r from-[#d89860] to-[#e0a670] text-white rounded-lg hover:shadow-lg hover:scale-105 transition font-semibold flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="animate-spin mr-2 h-5 w-5" /> Assigning...
+                  <Loader2 className="animate-spin w-5 h-5 mr-2" /> Assigning...
                 </>
               ) : (
                 "Assign Manually"
               )}
             </button>
+          </div>
+
+          {/* Scheduled List Card - matches EnrollmentPage table styling */}
+          <div className="bg-white/90 rounded-2xl shadow-xl overflow-x-auto">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-[#493737]">
+                Manually Scheduled Courses
+              </h2>
+              <p className="text-gray-600 text-sm mt-1">
+                View and manage manually scheduled courses
+              </p>
+            </div>
+
+            <table className="w-full text-sm text-[#493737]">
+              <thead className="bg-[#493737] text-white">
+                <tr>
+                  <th className="px-4 py-3 text-left">#</th>
+                  <th className="px-4 py-3 text-left">Course</th>
+                  <th className="px-4 py-3 text-left">Faculty</th>
+                  <th className="px-4 py-3 text-left">Room</th>
+                  <th className="px-4 py-3 text-left">Day</th>
+                  <th className="px-4 py-3 text-left">Time Slot</th>
+                  <th className="px-4 py-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-8 text-gray-500">
+                      Loading schedules...
+                    </td>
+                  </tr>
+                ) : schedules.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-8 text-gray-500">
+                      No manually scheduled courses yet.
+                    </td>
+                  </tr>
+                ) : (
+                  schedules.map((schedule, idx) => (
+                    <tr
+                      key={schedule._id}
+                      className="border-b hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-3">{idx + 1}</td>
+
+                      <td className="px-4 py-3 font-medium">
+                        <div>{schedule.courseId?.code}</div>
+                        <div className="text-sm text-gray-600">
+                          {schedule.courseId?.title}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <div className="font-medium">
+                          {schedule.facultyId?.name}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {schedule.facultyId?.email}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3 font-semibold text-[#d89860]">
+                        {schedule.roomId?.classroomId || schedule.roomId?.name}
+                      </td>
+
+                      <td className="px-4 py-3">{schedule.day}</td>
+
+                      <td className="px-4 py-3">{schedule.slot}</td>
+
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => handleDelete(schedule._id)}
+                          disabled={deletingId === schedule._id}
+                          className="p-2 rounded-lg bg-red-100 hover:bg-red-200 transition text-red-600"
+                          title="Delete schedule"
+                        >
+                          {deletingId === schedule._id ? (
+                            <Loader2 className="animate-spin w-4 h-4" />
+                          ) : (
+                            <Trash2 size={18} />
+                          )}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
