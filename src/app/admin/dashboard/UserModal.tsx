@@ -62,7 +62,9 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
     email: "",
     role: "faculty",
     designation: "",
-    department: "", 
+    department: "",
+    batch: "",
+    semester: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -74,7 +76,9 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         email: selected.email || "",
         role: selected.role || "faculty",
         designation: selected.designation || "",
-        department: "", 
+        department: "",
+        batch: "",
+        semester: "",
       });
     } else {
       setForm({
@@ -83,6 +87,8 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         role: "faculty",
         designation: "",
         department: "",
+        batch: "",
+        semester: "",
       });
     }
   }, [selected]);
@@ -96,6 +102,8 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         role: selected.role || "faculty",
         designation: selected.designation || "",
         department: "",
+        batch: "",
+        semester: "",
       });
     } else {
       setForm({
@@ -104,6 +112,8 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         role: "faculty",
         designation: "",
         department: "",
+        batch: "",
+        semester: "",
       });
     }
   };
@@ -122,9 +132,11 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
         ? `/api/admin/users/${selected._id}`
         : "/api/admin/users";
 
-      // Remove department before sending to backend
+      // Remove department, batch, semester before sending to backend
       const payload: any = { ...form };
       delete payload.department;
+      delete payload.batch;
+      delete payload.semester;
 
       if (form.role !== "faculty") {
         delete payload.designation;
@@ -225,6 +237,8 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
                   role: e.target.value,
                   designation: "",
                   department: "",
+                  batch: "",
+                  semester: "",
                 })
               }
               disabled={loading}
@@ -276,6 +290,41 @@ export default function UserModal({ open, setOpen, selected, refresh }: Props) {
                       {d}
                     </option>
                   ))}
+                </select>
+              </div>
+            </>
+          )}
+
+          {form.role === "student" && (
+            <>
+              <div className="space-y-1">
+                <Label className="text-gray-700 text-sm">Batch</Label>
+                <Input
+                  value={form.batch}
+                  onChange={(e) => setForm({ ...form, batch: e.target.value })}
+                  placeholder="e.g., 2024"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-gray-700 text-sm">Semester</Label>
+                <select
+                  value={form.semester}
+                  onChange={(e) =>
+                    setForm({ ...form, semester: e.target.value })
+                  }
+                  disabled={loading}
+                  className="w-full border rounded-md px-3 py-2"
+                >
+                  <option value="">Select Semester</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
                 </select>
               </div>
             </>
