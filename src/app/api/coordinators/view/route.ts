@@ -26,13 +26,30 @@ export async function GET() {
       })
       .lean();
 
-    if (!schedule || schedule.length === 0) {
+    const validSchedule = schedule.filter(
+      (entry) => entry.courseId && entry.facultyId && entry.roomId
+    );
+
+    const orphanIds = schedule
+      .filter((entry) => !entry.courseId || !entry.facultyId || !entry.roomId)
+      .map((entry) => entry._id);
+
+    if (orphanIds.length > 0) {
+      await ScheduleEntry.deleteMany({ _id: { $in: orphanIds } });
+      console.log(`Removed ${orphanIds.length} orphaned schedule entries`);
+    }
+
+    if (!validSchedule || validSchedule.length === 0) {
       return NextResponse.json(
         { success: false, message: "No schedule generated yet." },
         { status: 200 }
       );
     }
-    return NextResponse.json({ success: true, schedule }, { status: 200 });
+
+    return NextResponse.json(
+      { success: true, schedule: validSchedule },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error("Error fetching schedule:", error);
     return NextResponse.json(
