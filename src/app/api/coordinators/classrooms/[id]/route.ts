@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
 import Classroom from "@/models/Classroom";
+import ScheduleEntry from "@/models/ScheduleEntry";
 import { classroomSchema } from "@/lib/zodSchemas";
 
 export async function GET(_req: Request, context: { params: { id: string } }) {
@@ -28,7 +29,6 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   try {
     await connectDB();
     const body = await req.json();
-
     const parsed = classroomSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -36,7 +36,6 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
         { status: 400 }
       );
     }
-
     const classroom = await Classroom.findByIdAndUpdate(
       context.params.id,
       parsed.data,
@@ -48,7 +47,6 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
         { status: 404 }
       );
     }
-
     return NextResponse.json({ success: true, data: classroom });
   } catch (error) {
     console.error("PUT Classroom Error:", error);
@@ -65,14 +63,29 @@ export async function DELETE(
 ) {
   try {
     await connectDB();
-    const classroom = await Classroom.findByIdAndDelete(context.params.id);
+
+    const classroom = await Classroom.findById(context.params.id);
+
     if (!classroom) {
       return NextResponse.json(
         { success: false, message: "Classroom not found" },
         { status: 404 }
       );
     }
-    return NextResponse.json({ success: true, message: "Classroom deleted" });
+
+    const classroomId = classroom._id;
+
+    await Classroom.findByIdAndDelete(context.params.id);
+
+    const scheduleDeleteResult = await ScheduleEntry.deleteMany({
+      roomId: classroomId,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Classroom deleted successfully",
+      deletedSchedules: scheduleDeleteResult.deletedCount,
+    });
   } catch (error) {
     console.error("DELETE Classroom Error:", error);
     return NextResponse.json(

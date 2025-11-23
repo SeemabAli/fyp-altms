@@ -2,6 +2,8 @@
 import { NextResponse } from "next/server";
 import User from "@/models/User";
 import { connectDB } from "@/lib/mongoose";
+import FacultyPreference from "@/models/Faculty";
+import ScheduleEntry from "@/models/ScheduleEntry";
 
 export async function GET(
   _req: Request,
@@ -79,14 +81,46 @@ export async function DELETE(
 ) {
   try {
     await connectDB();
-    const deletedUser = await User.findByIdAndDelete(params.id);
 
-    if (!deletedUser) {
+    const user = await User.findById(params.id);
+
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
+    let deletedSchedules = 0;
+
+    if (user.role === "faculty") {
+      await FacultyPreference.deleteMany({ facultyId: user._id });
+      console.log(`Deleted all FacultyPreferences for ${user.name}`);
+
+      const scheduleDeleteResult = await ScheduleEntry.deleteMany({
+        facultyId: user._id,
+      });
+      deletedSchedules = scheduleDeleteResult.deletedCount;
+      console.log(
+        `Deleted ${deletedSchedules} schedules for faculty ${user.name}`
+      );
+    }
+
+    if (user.role === "student") {
+      const { default: Enrollment } = await import("@/models/Enrollment");
+      const deleted = await Enrollment.deleteMany({ studentId: user._id });
+      console.log(
+        `Deleted ${deleted.deletedCount} enrollments for ${user.name}`
+      );
+    }
+
+    // Delete the user
+    await User.findByIdAndDelete(params.id);
+
+    return NextResponse.json({
+      success: true,
+      message: "User and related data deleted successfully",
+      deletedSchedules,
+    });
   } catch (error: any) {
+    console.error("Error deleting user:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

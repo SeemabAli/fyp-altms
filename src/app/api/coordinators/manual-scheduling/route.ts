@@ -1,4 +1,3 @@
-// Correct path: app/api/coordinators/manual-scheduling/route.ts
 
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
@@ -20,7 +19,7 @@ export async function POST(req: Request) {
     if (exists) {
       return NextResponse.json(
         { error: "Faculty already has a class in this slot" },
-        { status: 409 } 
+        { status: 409 }
       );
     }
 
@@ -35,7 +34,7 @@ export async function POST(req: Request) {
     const entry = await ScheduleEntry.create({
       courseId,
       facultyId,
-      roomId, 
+      roomId,
       slot,
       day,
     });
@@ -45,6 +44,26 @@ export async function POST(req: Request) {
     console.error("Manual scheduling error:", error);
     return NextResponse.json(
       { error: "Failed to manually schedule" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    await connectDB();
+
+    const schedules = await ScheduleEntry.find()
+      .populate("courseId", "code title")
+      .populate("facultyId", "name email")
+      .populate("roomId", "classroomId name")
+      .lean();
+
+    return NextResponse.json({ success: true, data: schedules });
+  } catch (error) {
+    console.error("Fetch manual schedules error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch schedules" },
       { status: 500 }
     );
   }

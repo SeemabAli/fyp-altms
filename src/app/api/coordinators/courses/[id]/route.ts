@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
 import Course from "@/models/Course";
+import ScheduleEntry from "@/models/ScheduleEntry";
 import { courseSchema } from "@/lib/zodSchemas";
 
 export async function GET(_req: Request, context: { params: { id: string } }) {
@@ -71,14 +72,30 @@ export async function DELETE(
 ) {
   try {
     await connectDB();
-    const deleted = await Course.findByIdAndDelete(context.params.id);
-    if (!deleted) {
+
+    const course = await Course.findById(context.params.id);
+
+    if (!course) {
       return NextResponse.json(
         { success: false, error: "Not found" },
         { status: 404 }
       );
     }
-    return NextResponse.json({ success: true, data: deleted });
+
+    const courseId = course._id;
+
+    await Course.findByIdAndDelete(context.params.id);
+
+    const scheduleDeleteResult = await ScheduleEntry.deleteMany({
+      courseId: courseId,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: course,
+      message: "Course deleted successfully",
+      deletedSchedules: scheduleDeleteResult.deletedCount,
+    });
   } catch (err) {
     console.error("DELETE /api/courses/[id] error:", err);
     return NextResponse.json(
