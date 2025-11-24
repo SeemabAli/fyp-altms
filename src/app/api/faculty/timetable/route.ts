@@ -4,6 +4,10 @@ import ScheduleEntry from "@/models/ScheduleEntry";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+import "@/models/Course";
+import "@/models/Classroom";
+import "@/models/Faculty";
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
