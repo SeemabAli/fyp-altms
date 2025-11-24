@@ -61,9 +61,7 @@ export default function FacultyTimetable() {
             Automated Timetable System
           </span>
         </div>
-        <button className="px-4 py-2rounded text-sm transition">
-          <LogoutButton />
-        </button>
+        <LogoutButton />
       </div>
 
       <div className="max-w-6xl mx-auto p-6">
