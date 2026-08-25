@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import { Loader2, User, Mail, Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 import { DAYS, TIME_SLOTS, normalizeSlotString } from "@/lib/constants";
@@ -80,9 +81,12 @@ export default function StudentTimetablePage() {
     <ProtectedRoute allowedRoles={["student"]}>
       {/* HEADER */}
       <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow-lg">
-        <span className="text-lg font-semibold tracking-wide">
-          Student Portal – My Timetable
-        </span>
+        <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/auth/signin" />
+          <span className="text-lg font-semibold tracking-wide">
+            Student Portal – My Timetable
+          </span>
+        </div>
         <LogoutButton />
       </div>
 

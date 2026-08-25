@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 
@@ -89,13 +90,13 @@ export default function FacultyPreferencesPage() {
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
       <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
-        <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
+        <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/faculty/dashboard" />
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
               alt="VU Logo"
-              className="w-8 h-auto"
-              style={{ height: "auto" }}
+              className="w-7"
             />
           </div>
           <span className="text-lg font-semibold">

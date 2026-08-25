@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import {
   CalendarDays,
   ClipboardList,
@@ -37,12 +38,13 @@ export default function FacultyDashboard() {
     <ProtectedRoute allowedRoles={["faculty"]}>
       <header className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md relative">
         {/* Left Section */}
-        <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
+        <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/auth/signin" />
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
               alt="VU Logo"
-              className="w-8 h-auto"
+              className="w-7 h-auto"
             />
           </div>
           <span className="text-lg font-semibold tracking-wide">

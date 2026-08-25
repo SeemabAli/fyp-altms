@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import toast from "react-hot-toast";
 import { DAYS, TIME_SLOTS, normalizeSlotString } from "@/lib/constants";
 import { RefreshCw, Layers, User, MapPin, Sparkles } from "lucide-react";
@@ -115,6 +116,7 @@ export default function ViewSchedulePage() {
       {/* Top Navigation */}
       <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow-md">
         <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/coordinator/dashboard" />
           <span className="text-lg font-semibold tracking-wide">
             Master Timetable View
           </span>

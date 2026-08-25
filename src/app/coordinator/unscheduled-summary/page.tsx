@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import toast from "react-hot-toast";
 import { Loader2, AlertTriangle } from "lucide-react";
 
@@ -56,7 +57,10 @@ export default function UnscheduledSummaryPage() {
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
       <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow-md">
-        <span className="text-lg font-semibold">Unscheduled Summary</span>
+        <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/coordinator/dashboard" />
+          <span className="text-lg font-semibold">Unscheduled Summary</span>
+        </div>
         <LogoutButton />
       </div>
 

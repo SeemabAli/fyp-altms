@@ -5,6 +5,7 @@
 import { useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import ScheduleDeleteModal from "./ScheduleDelete";
 import {
   Loader2,
@@ -47,6 +48,7 @@ export default function GenerateSchedulePage() {
     <ProtectedRoute allowedRoles={["coordinator", "admin"]}>
       <header className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow">
         <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/coordinator/dashboard" />
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"

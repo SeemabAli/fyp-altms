@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import CourseModal from "./CourseModal";
@@ -44,14 +45,15 @@ export default function CoordinatorCoursesPage() {
 
   return (
     <ProtectedRoute allowedRoles={["coordinator"]}>
-      <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
-        <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
+      {/* Top Navbar */}
+      <div className="bg-[#493737] text-white px-6 py-4 flex justify-between items-center shadow-md">
+        <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/coordinator/dashboard" />
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
               alt="VU Logo"
-              className="w-8 h-auto"
-              style={{ width: "auto", height: "auto" }}
+              className="w-7"
             />
           </div>
           <span className="text-lg font-semibold">

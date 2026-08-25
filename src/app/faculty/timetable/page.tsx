@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoutButton from "@/components/LogoutButton";
+import BackButton from "@/components/BackButton";
 import { DAYS } from "@/lib/constants";
 import { Calendar, Loader2 } from "lucide-react";
 
@@ -51,8 +52,9 @@ export default function FacultyTimetable() {
 
   return (
     <ProtectedRoute allowedRoles={["faculty"]}>
-      <div className="bg-[#3d2e2e] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
-        <div className="flex items-center gap-3 min-w-[200px] mb-2 sm:mb-0">
+      <div className="bg-[#493737] text-white px-6 py-4 flex flex-wrap items-center justify-between shadow-md">
+        <div className="flex items-center gap-3">
+          <BackButton fallbackUrl="/faculty/dashboard" />
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/VU_Logo.png/960px-VU_Logo.png"
