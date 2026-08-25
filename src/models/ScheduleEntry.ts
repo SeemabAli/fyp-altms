@@ -7,6 +7,8 @@ export interface IScheduleEntry extends Document {
   roomId: Types.ObjectId;
   day: string;
   slot: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const ScheduleEntrySchema = new Schema<IScheduleEntry>(
@@ -19,6 +21,11 @@ const ScheduleEntrySchema = new Schema<IScheduleEntry>(
   },
   { timestamps: true }
 );
+
+// Indexes for fast querying and constraint safety
+ScheduleEntrySchema.index({ day: 1, slot: 1, roomId: 1 });
+ScheduleEntrySchema.index({ day: 1, slot: 1, facultyId: 1 });
+ScheduleEntrySchema.index({ courseId: 1 });
 
 const ScheduleEntry: Model<IScheduleEntry> =
   mongoose.models.ScheduleEntry ||

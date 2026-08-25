@@ -1,22 +1,20 @@
-import mongoose from "mongoose";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Enrollment from "@/models/Enrollment";
 import ScheduleEntry from "@/models/ScheduleEntry";
+import Course from "@/models/Course";
+import User from "@/models/User";
 
 import "@/models/Course";
 import "@/models/Classroom";
 import "@/models/User";
-import { NextResponse } from "next/server";
-
-console.log("Registered models on server:", mongoose.modelNames());
 
 export async function GET() {
   try {
     await connectDB();
-
-    console.log("Registered models before populate:", mongoose.modelNames());
 
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "student") {
@@ -25,38 +23,49 @@ export async function GET() {
 
     const studentId = session.user.id;
 
+    // 1. Check direct enrollments
     const enrollments = await Enrollment.find({ studentId }).select("courseId");
+    let courseIds: any[] = enrollments.map((e) => e.courseId);
 
-    if (enrollments.length === 0) {
+    // 2. Fallback: If no direct enrollments, check student batch
+    if (courseIds.length === 0) {
+      const studentUser = await User.findById(studentId).select("batch");
+      const batchName = studentUser?.batch || (session.user as any).batch;
+      if (batchName) {
+        const batchCourses = await Course.find({
+          studentBatch: { $regex: new RegExp(`^${batchName.trim()}$`, "i") },
+        }).select("_id");
+        courseIds = batchCourses.map((c) => c._id);
+      }
+    }
+
+    if (courseIds.length === 0) {
       return NextResponse.json({
         success: true,
         timetable: [],
-        message: "No enrolled courses found.",
+        message: "No enrolled courses or batch schedule found.",
       });
     }
 
-    const courseIds = enrollments.map((e) => e.courseId);
-
     const schedule = await ScheduleEntry.find({ courseId: { $in: courseIds } })
-      .populate({ path: "courseId", model: "Course", select: "code title" })
+      .populate({ path: "courseId", model: "Course", select: "code title studentBatch" })
       .populate({
         path: "facultyId",
         model: "User",
-        select: "name designation",
+        select: "name designation email",
       })
       .populate({
         path: "roomId",
         model: "Classroom",
-        select: "name capacity multimedia",
-      });
-
-    console.log("Registered models after imports:", mongoose.modelNames());
+        select: "name capacity multimedia type",
+      })
+      .lean();
 
     return NextResponse.json({ success: true, timetable: schedule });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching student timetable:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch timetable" },
+      { success: false, error: error.message || "Failed to fetch timetable" },
       { status: 500 }
     );
   }

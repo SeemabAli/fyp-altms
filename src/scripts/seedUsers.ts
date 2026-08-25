@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
+import dns from "dns";
+
+try {
+  dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]);
+} catch {}
 
 // ✅ Explicitly load `.env.local` for standalone scripts
 dotenv.config({ path: ".env.local" });

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
 import ScheduleEntry from "@/models/ScheduleEntry";
@@ -20,15 +21,15 @@ export async function GET() {
     const timetable = await ScheduleEntry.find({
       facultyId: session.user.id,
     })
-      .populate("courseId", "code title")
-      .populate("roomId", "name")
+      .populate("courseId", "code title studentBatch creditHours")
+      .populate("roomId", "name capacity type multimedia")
       .sort({ day: 1 });
 
     return NextResponse.json({ success: true, timetable });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching faculty timetable:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch timetable" },
+      { success: false, error: error.message || "Failed to fetch timetable" },
       { status: 500 }
     );
   }
