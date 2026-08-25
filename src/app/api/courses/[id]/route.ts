@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/mongoose";
 import Course from "@/models/Course";
 import { z } from "zod";
 
-export const courseUpdateSchema = z.object({
+const courseUpdateSchema = z.object({
   code: z.string().min(2).optional(),
   title: z.string().min(3).optional(),
   enrollment: z.number().min(1).optional(),
@@ -12,10 +12,14 @@ export const courseUpdateSchema = z.object({
   studentBatch: z.string().optional().nullable(),
 });
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  _: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
-    const course = await Course.findById(params.id);
+    const { id } = await params;
+    const course = await Course.findById(id);
     if (!course)
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     return NextResponse.json(course, { status: 200 });
@@ -30,10 +34,11 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
     const body = await req.json();
 
     const parsed = courseUpdateSchema.safeParse(body);
@@ -47,7 +52,7 @@ export async function PUT(
     const update: any = { ...parsed.data };
     if (update.code) update.code = update.code.toUpperCase();
 
-    const updated = await Course.findByIdAndUpdate(params.id, update, {
+    const updated = await Course.findByIdAndUpdate(id, update, {
       new: true,
     });
     if (!updated)
@@ -65,11 +70,12 @@ export async function PUT(
 
 export async function DELETE(
   _: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const deleted = await Course.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const deleted = await Course.findByIdAndDelete(id);
     if (!deleted)
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     return NextResponse.json(

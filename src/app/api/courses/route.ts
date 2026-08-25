@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/mongoose";
 import Course from "@/models/Course";
 import { z } from "zod";
 
-export const courseSchema = z.object({
+const courseSchema = z.object({
   code: z.string().min(2, "Course code is required"),
   title: z.string().min(3, "Course title is required"),
   enrollment: z.number().min(1, "Enrollment must be at least 1"),

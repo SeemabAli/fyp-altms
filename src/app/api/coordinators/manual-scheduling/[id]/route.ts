@@ -8,7 +8,7 @@ import ScheduleEntry from "@/models/ScheduleEntry";
 
 export async function DELETE(
   _req: Request,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -21,8 +21,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const resolvedParams = await context.params;
-    const { id } = resolvedParams;
+    const { id } = await context.params;
 
     const schedule = await ScheduleEntry.findById(id);
 

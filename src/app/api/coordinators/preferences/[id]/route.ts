@@ -7,17 +7,17 @@ import ScheduleEntry from "@/models/ScheduleEntry";
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "coordinator") {
+    if (!session || (session.user.role !== "coordinator" && session.user.role !== "admin")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const preference = await FacultyPreference.findById(id);
 

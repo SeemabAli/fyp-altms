@@ -7,11 +7,12 @@ import ScheduleEntry from "@/models/ScheduleEntry";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const user = await User.findById(params.id);
+    const { id } = await params;
+    const user = await User.findById(id);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -25,10 +26,11 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
     const body = await req.json();
     const { name, email, role, designation } = body;
 
@@ -41,7 +43,7 @@ export async function PUT(
 
     const existingUser = await User.findOne({
       email,
-      _id: { $ne: params.id },
+      _id: { $ne: id },
     });
 
     if (existingUser) {
@@ -52,7 +54,7 @@ export async function PUT(
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      params.id,
+      id,
       {
         name,
         email,
@@ -77,12 +79,13 @@ export async function PUT(
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
 
-    const user = await User.findById(params.id);
+    const user = await User.findById(id);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -112,7 +115,7 @@ export async function DELETE(
     }
 
     // Delete the user
-    await User.findByIdAndDelete(params.id);
+    await User.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,

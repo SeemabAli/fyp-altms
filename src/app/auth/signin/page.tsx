@@ -2,8 +2,8 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Eye, EyeOff, Mail, Lock, AlertCircle, LogIn } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
+import { Eye, EyeOff, Mail, Lock, AlertCircle, LogIn, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface FormErrors {
@@ -12,7 +12,7 @@ interface FormErrors {
   general?: string;
 }
 
-export default function SignInPage() {
+function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -241,7 +241,7 @@ export default function SignInPage() {
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -262,7 +262,7 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full bg-gradient-to-r from-[#d89860] to-[#e0a670] hover:from-[#c88850] hover:to-[#d89860] text-white py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#d89860]/20"
+                className="group relative w-full bg-gradient-to-r from-[#d89860] to-[#e0a670] hover:from-[#c88850] hover:to-[#d89860] text-white py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#d89860]/20 cursor-pointer"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -287,5 +287,19 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <Loader2 className="w-8 h-8 animate-spin text-[#d89860]" />
+        </div>
+      }
+    >
+      <SignInForm />
+    </Suspense>
   );
 }

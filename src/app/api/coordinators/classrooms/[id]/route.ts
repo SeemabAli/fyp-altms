@@ -5,10 +5,14 @@ import Classroom from "@/models/Classroom";
 import ScheduleEntry from "@/models/ScheduleEntry";
 import { classroomSchema } from "@/lib/zodSchemas";
 
-export async function GET(_req: Request, context: { params: { id: string } }) {
+export async function GET(
+  _req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
-    const classroom = await Classroom.findById(context.params.id);
+    const { id } = await context.params;
+    const classroom = await Classroom.findById(id);
     if (!classroom) {
       return NextResponse.json(
         { success: false, message: "Classroom not found" },
@@ -25,9 +29,13 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
+    const { id } = await context.params;
     const body = await req.json();
     const parsed = classroomSchema.safeParse(body);
     if (!parsed.success) {
@@ -37,7 +45,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       );
     }
     const classroom = await Classroom.findByIdAndUpdate(
-      context.params.id,
+      id,
       parsed.data,
       { new: true }
     );
@@ -59,12 +67,13 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 
 export async function DELETE(
   _req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await context.params;
 
-    const classroom = await Classroom.findById(context.params.id);
+    const classroom = await Classroom.findById(id);
 
     if (!classroom) {
       return NextResponse.json(
@@ -75,7 +84,7 @@ export async function DELETE(
 
     const classroomId = classroom._id;
 
-    await Classroom.findByIdAndDelete(context.params.id);
+    await Classroom.findByIdAndDelete(id);
 
     const scheduleDeleteResult = await ScheduleEntry.deleteMany({
       roomId: classroomId,

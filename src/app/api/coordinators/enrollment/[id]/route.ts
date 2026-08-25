@@ -5,12 +5,13 @@ import ScheduleEntry from "@/models/ScheduleEntry";
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
 
-    const enrollment = await Enrollment.findById(params.id);
+    const enrollment = await Enrollment.findById(id);
 
     if (!enrollment) {
       return NextResponse.json(
@@ -21,7 +22,7 @@ export async function DELETE(
 
     const courseId = enrollment.courseId;
 
-    await Enrollment.findByIdAndDelete(params.id);
+    await Enrollment.findByIdAndDelete(id);
 
     const scheduleDeleteResult = await ScheduleEntry.deleteMany({
       courseId: courseId,

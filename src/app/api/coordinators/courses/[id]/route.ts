@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
-import Course from "@/models/Course";
+import Course, { ICourse } from "@/models/Course";
 import ScheduleEntry from "@/models/ScheduleEntry";
 import { courseSchema } from "@/lib/zodSchemas";
 
-export async function GET(_req: Request, context: { params: { id: string } }) {
+export async function GET(
+  _req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
-    const c = await Course.findById(context.params.id).lean();
+    const { id } = await context.params;
+    const c = await Course.findById(id).lean<ICourse>();
     if (!c) {
       return NextResponse.json(
         { success: false, error: "Not found" },
@@ -30,9 +34,13 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
+    const { id } = await context.params;
     const body = await req.json();
     const parsed = courseSchema.safeParse(body);
     if (!parsed.success) {
@@ -46,7 +54,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       ...parsed.data,
     };
 
-    const updated = await Course.findByIdAndUpdate(context.params.id, data, {
+    const updated = await Course.findByIdAndUpdate(id, data, {
       new: true,
     });
     if (!updated) {
@@ -68,12 +76,13 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 
 export async function DELETE(
   _req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await context.params;
 
-    const course = await Course.findById(context.params.id);
+    const course = await Course.findById(id);
 
     if (!course) {
       return NextResponse.json(
@@ -84,7 +93,7 @@ export async function DELETE(
 
     const courseId = course._id;
 
-    await Course.findByIdAndDelete(context.params.id);
+    await Course.findByIdAndDelete(id);
 
     const scheduleDeleteResult = await ScheduleEntry.deleteMany({
       courseId: courseId,
